@@ -16,5 +16,17 @@ app.get('/', (req, res) => {
   res.send("TravelMate API is running");
 });
 
+const favoriteRoutes = require('./routes/favoriteRoutes');
+app.use('/api/favorites', favoriteRoutes);
+
+const budgetRoutes = require('./routes/budgetRoutes');
+app.use('/api/budget', budgetRoutes);
+
+const reviewRoutes = require('./routes/reviewRoutes');
+app.use('/api/reviews', reviewRoutes);
+
+const chatRoutes = require('./routes/chatRoutes');
+app.use('/api/chat', chatRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

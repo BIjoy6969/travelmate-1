@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import FavoritesPage from './pages/FavoritesPage';
+import BudgetTracker from './pages/BudgetTracker';
+import AIChat from './pages/AIChat';
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="app-container min-h-screen bg-gray-50">
+        {/* Temporary Navigation for Member 3 Dev */}
+        <nav className="bg-white shadow p-4 mb-4">
+          <div className="max-w-7xl mx-auto flex gap-4">
+            <Link to="/" className="text-blue-600 font-bold hover:underline">Home</Link>
+            <Link to="/favorites" className="text-blue-600 font-bold hover:underline">Favorites</Link>
+            <Link to="/budget" className="text-blue-600 font-bold hover:underline">Budget</Link>
+            <Link to="/chat" className="text-blue-600 font-bold hover:underline">AI Assistant</Link>
+          </div>
+        </nav>
+
+        <Routes>
+          <Route path="/" element={
+            <div className="p-8 text-center">
+              <h1 className="text-4xl font-bold text-gray-800 mb-4">TravelMate</h1>
+              <p className="text-xl text-gray-600">Welcome to your ultimate travel companion.</p>
+              <p className="mt-4 text-sm text-gray-400">Navigate to 'Favorites', 'Budget', or 'AI Assistant'.</p>
+            </div>
+          } />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/budget" element={<BudgetTracker />} />
+          <Route path="/chat" element={<AIChat />} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </Router>
   )
 }
 
 export default App
+
