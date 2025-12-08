@@ -28,5 +28,8 @@ app.use('/api/reviews', reviewRoutes);
 const chatRoutes = require('./routes/chatRoutes');
 app.use('/api/chat', chatRoutes);
 
+const destinationRoutes = require('./routes/destinationRoutes');
+app.use('/api/destinations', destinationRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
