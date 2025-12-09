@@ -30,6 +30,8 @@ app.use('/api/chat', chatRoutes);
 
 const weatherRoutes = require('./routes/weatherRoutes');
 app.use('/api/weather', weatherRoutes);
+const destinationRoutes = require('./routes/destinationRoutes');
+app.use('/api/destinations', destinationRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,52 +1,99 @@
-# TravelMate 🌍✈️
+# Travelmate
 
-TravelMate is a comprehensive MERN stack travel planning application designed to assist users in discovering destinations, managing budgets, and organizing trips with the help of AI.
+A full-stack application for saving your favorite travel destinations, built with Node.js, React, MongoDB, and TypeScript.
 
-## Project Overview
+## Features
 
-This project is divided into three key modules, developed collaboratively:
-
-*   **Module 1: User & Destination Management**
-    *   Authentication (Login/Signup)
-    *   Explore Destinations (Reviews, Weather)
-    *   **Favorites Management** (Saves destinations with personal notes)
-*   **Module 2: Trip & Budget Planning**
-    *   Trip Itinerary Creation
-    *   **Budget Tracker** (Expense logging, Visualization, Daily Limit Calculator)
-    *   Currency Conversion
-*   **Module 3: Flight, Hotel & Support**
-    *   Booking Systems
-    *   **AI Travel Assistant** (Context-aware Chatbot using Gemini API)
-    *   **Reviews & Ratings** (Multi-category feedback system)
-
-## Progress Status
-
-### ✅ Member 3 Features (Completed)
-
-1.  **Favorites with Notes**
-    *   Users can save favorite destinations.
-    *   Added ability to attach personal notes to saved locations.
-2.  **Premium Budget Tracker**
-    *   Full expense tracking capability.
-    *   **Visual Analytics**: Interactive Pie Chart breakdown.
-    *   **Smart Calc**: "Safe-to-Spend" daily limit based on trip duration.
-3.  **AI Travel Assistant**
-    *   Integrated **Google Gemini 2.0 Flash / Latest** model.
-    *   **Context-Aware**: The AI knows your current budget and saved favorites to give personalized advice.
-4.  **Advanced Reviews**
-    *   Implemented detailed rating system (Cleanliness, Service, Location, Value).
+- **Authentication**: Secure JWT-based auth with HttpOnly refresh tokens.
+- **Save Destinations**: Search and save places using Google Maps Autocomplete.
+- **Dashboard**: View your saved list with details.
+- **Responsive UI**: Modern interface with specific design aesthetics.
 
 ## Tech Stack
 
-*   **Frontend**: React (Vite), Tailwind CSS, Lucide React, Recharts
-*   **Backend**: Node.js, Express, Mongoose
-*   **AI**: Google Gemini API
-*   **Database**: MongoDB
+- **Frontend**: React, TypeScript, TailwindCSS, Vite
+- **Backend**: Node.js, Express, TypeScript
+- **Database**: MongoDB
+- **Infrastructure**: Docker, Docker Compose
 
-## Setup
+## Prerequisites
 
-1.  Clone repository.
-2.  Install dependencies: `npm install` in both `/client` and `/server`.
-3.  Set up `.env` in `/server` with `MONGO_URI` and `GEMINI_API_KEY`.
-4.  Run Backend: `npm start` (Port 5000).
-5.  Run Frontend: `npm run dev` (Port 5173).
+- Node.js (v18+)
+- Docker & Docker Compose
+- Google Maps API Key (Places API enabled)
+
+## Setup & Running
+
+### 1. Environment Variables
+
+**Backend** (`server/.env`):
+```env
+NODE_ENV=development
+PORT=5000
+MONGO_URI=mongodb://mongo:27017/travelmate
+JWT_SECRET=supersecret123
+JWT_REFRESH_SECRET=superrefreshsecret123
+```
+
+**Frontend** (`client/.env`):
+```env
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+### 2. Run with Docker (Recommended)
+
+```bash
+docker-compose up --build
+```
+
+The app will be available at:
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:1340
+
+### 3. Run Locally
+
+**Backend:**
+```bash
+cd server
+npm install
+npm run dev
+```
+
+**Frontend:**
+```bash
+cd client
+npm install
+npm run dev
+```
+
+## Seeding Data
+
+To seed a demo user:
+
+```bash
+cd server
+npm run seed
+```
+
+**Demo Credentials**:
+- Email: `demo@example.com`
+- Password: `Demo123!`
+
+## API Endpoints
+
+- `POST /api/auth/register` - Create account
+- `POST /api/auth/login` - Login
+- `POST /api/auth/refresh` - Refresh access token
+- `POST /api/auth/logout` - Logout
+- `GET /api/destinations` - Get saved places
+- `POST /api/destinations` - Save a place
+- `DELETE /api/destinations/:id` - Remove a place
+
+## Testing
+
+Run backend tests:
+
+```bash
+cd server
+npm test
+```

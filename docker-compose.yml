@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: travelmate_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./server
+    container_name: travelmate_backend
+    ports:
+      - "1340:1340"
+    environment:
+      - NODE_ENV=production
+      - PORT=1340
+      - MONGO_URI=mongodb+srv://group8:LdWcXIQZ3xbDzbqC@cluster0.ipp29ka.mongodb.net/?appName=Cluster0
+      - GEMINI_API_KEY=AIzaSyA2PRpUjerWekkjJO-H9-Ayvr6ccCOGA-o
+      - JWT_SECRET=dockersecret
+      - JWT_REFRESH_SECRET=dockerrefreshsecret
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./client
+    container_name: travelmate_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
