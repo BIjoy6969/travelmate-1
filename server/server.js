@@ -28,6 +28,8 @@ app.use('/api/reviews', reviewRoutes);
 const chatRoutes = require('./routes/chatRoutes');
 app.use('/api/chat', chatRoutes);
 
+const weatherRoutes = require('./routes/weatherRoutes');
+app.use('/api/weather', weatherRoutes);
 const destinationRoutes = require('./routes/destinationRoutes');
 app.use('/api/destinations', destinationRoutes);
 
