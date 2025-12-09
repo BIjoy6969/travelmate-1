@@ -16,7 +16,7 @@ const FavoritesPage = () => {
 
     const fetchFavorites = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/favorites/${USER_ID}`);
+            const res = await fetch(`http://localhost:1340/api/favorites/${USER_ID}`);
             const data = await res.json();
             setFavorites(data);
         } catch (error) {
@@ -27,7 +27,7 @@ const FavoritesPage = () => {
     const removeFavorite = async (id) => {
         if (!window.confirm("Are you sure you want to remove this favorite?")) return;
         try {
-            await fetch(`http://localhost:5000/api/favorites/${id}`, { method: 'DELETE' });
+            await fetch(`http://localhost:1340/api/favorites/${id}`, { method: 'DELETE' });
             setFavorites(favorites.filter(fav => fav._id !== id));
         } catch (error) {
             console.error("Error deleting favorite:", error);
@@ -43,7 +43,7 @@ const FavoritesPage = () => {
     const saveNote = async () => {
         if (!currentFavorite) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/favorites/${currentFavorite._id}`, {
+            const res = await fetch(`http://localhost:1340/api/favorites/${currentFavorite._id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ notes: noteText })

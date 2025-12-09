@@ -6,6 +6,10 @@ import cookieParser from 'cookie-parser';
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 import destinationRoutes from './routes/destinationRoutes';
+import favoriteRoutes from './routes/favoriteRoutes';
+import budgetRoutes from './routes/budgetRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import chatRoutes from './routes/chatRoutes';
 
 dotenv.config();
 
@@ -39,6 +43,10 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/destinations', destinationRoutes);
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/budget', budgetRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/', (req, res) => {
     res.send('TravelMate API is running');

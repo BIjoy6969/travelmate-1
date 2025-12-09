@@ -17,7 +17,7 @@ const BudgetTracker = () => {
 
     const fetchBudget = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/budget/${USER_ID}`);
+            const res = await fetch(`http://localhost:1340/api/budget/${USER_ID}`);
             if (res.ok) {
                 const data = await res.json();
                 setBudgetData(data);
@@ -37,7 +37,7 @@ const BudgetTracker = () => {
     const handleSetBudget = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch('http://localhost:5000/api/budget', {
+            const res = await fetch('http://localhost:1340/api/budget', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -57,7 +57,7 @@ const BudgetTracker = () => {
     const handleAddExpense = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`http://localhost:5000/api/budget/${USER_ID}/expenses`, {
+            const res = await fetch(`http://localhost:1340/api/budget/${USER_ID}/expenses`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newExpense)
@@ -72,7 +72,7 @@ const BudgetTracker = () => {
 
     const deleteExpense = async (expenseId) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/budget/${USER_ID}/expenses/${expenseId}`, {
+            const res = await fetch(`http://localhost:1340/api/budget/${USER_ID}/expenses/${expenseId}`, {
                 method: 'DELETE'
             });
             const data = await res.json();
