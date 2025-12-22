@@ -7,37 +7,41 @@ import jwt from 'jsonwebtoken';
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req: Request, res: Response) => {
-    const { name, email, password } = req.body;
+    try {
+        const { name, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email });
 
-    if (userExists) {
-        res.status(400).json({ message: 'User already exists' });
-        return;
-    }
+        if (userExists) {
+            res.status(400).json({ message: 'User already exists' });
+            return;
+        }
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-    });
-
-    if (user) {
-        const { accessToken, refreshToken } = generateTokens(res, (user._id as unknown) as string);
-
-        // Save refresh token to user DB using findByIdAndUpdate to avoid VersionError
-        await User.findByIdAndUpdate(user._id, {
-            $push: { refreshTokens: refreshToken }
+        const user = await User.create({
+            name,
+            email,
+            password,
         });
 
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            accessToken,
-        });
-    } else {
-        res.status(400).json({ message: 'Invalid user data' });
+        if (user) {
+            const { accessToken, refreshToken } = generateTokens(res, (user._id as unknown) as string);
+
+            await User.findByIdAndUpdate(user._id, {
+                $push: { refreshTokens: refreshToken }
+            });
+
+            res.status(201).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                accessToken,
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    } catch (error: any) {
+        console.error("Register Error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -45,27 +49,43 @@ const registerUser = async (req: Request, res: Response) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
-        const { accessToken, refreshToken } = generateTokens(res, (user._id as unknown) as string);
+        console.log(`[Login Attempt] Email: ${email}`);
+        if (!user) {
+            console.log('[Login Failed] User not found');
+            res.status(401).json({ message: 'Invalid email or password' });
+            return;
+        }
 
-        // Rotate refresh tokens: keep last 5 or just add new one?
-        // Let's just append for now, but in prod we might want to limit.
-        await User.findByIdAndUpdate(user._id, {
-            $push: { refreshTokens: refreshToken }
-        });
+        const isMatch = await user.matchPassword(password);
+        console.log(`[Login Attempt] Password Match: ${isMatch}`);
 
-        res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            accessToken,
-        });
-    } else {
-        res.status(401).json({ message: 'Invalid email or password' });
+        if (user && isMatch) {
+            // ... existing success logic ...
+            const { accessToken, refreshToken } = generateTokens(res, (user._id as unknown) as string);
+
+            // Rotate refresh tokens: keep last 5 or just add new one?
+            // Let's just append for now, but in prod we might want to limit.
+            await User.findByIdAndUpdate(user._id, {
+                $push: { refreshTokens: refreshToken }
+            });
+
+            res.json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                accessToken,
+            });
+        } else {
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
+    } catch (error: any) {
+        console.error("Login Error:", error);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -80,7 +100,7 @@ const refreshToken = async (req: Request, res: Response) => {
     const refreshToken = cookies.jwt;
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV !== 'development' });
 
-    const user = await User.findOne({ refreshTokens: refreshToken });
+    const user = await User.findOne({ refreshTokens: refreshToken }); //finds the user by their refresh token
 
     // Detected refresh token reuse!
     if (!user) {

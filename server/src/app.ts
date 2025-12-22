@@ -1,13 +1,18 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db';
 import authRoutes from './routes/authRoutes';
 import destinationRoutes from './routes/destinationRoutes';
+import tripRoutes from './routes/tripRoutes';
+import budgetRoutes from './routes/budgetRoutes';
+import favoriteRoutes from './routes/favoriteRoutes';
+import chatRoutes from './routes/chatRoutes';
+import weatherRoutes from './routes/weatherRoutes';
 
-dotenv.config();
+
 
 const app = express();
 
@@ -39,6 +44,11 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/destinations', destinationRoutes);
+app.use('/api/trips', tripRoutes);
+app.use('/api/budget', budgetRoutes);
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/weather', weatherRoutes);
 
 app.get('/', (req, res) => {
     res.send('TravelMate API is running');
