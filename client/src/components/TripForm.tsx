@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; //useState → a React hook used to store and update state (form values, errors).
+//useEffect → a React hook used to run code when something changes (here: when editing an existing trip).
 
 interface TripFormProps {
     existingTrip?: any;

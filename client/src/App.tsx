@@ -10,6 +10,7 @@ import FavoritesPage from './pages/FavoritesPage';
 import BudgetTracker from './pages/BudgetTracker';
 import AIChat from './pages/AIChat';
 import WeatherPage from './pages/WeatherPage';
+import FlightsPage from './pages/FlightsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/budget" element={<BudgetTracker />} />
                     <Route path="/chat" element={<AIChat />} />
                     <Route path="/weather" element={<WeatherPage />} />
+                    <Route path="/flights" element={<FlightsPage />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />

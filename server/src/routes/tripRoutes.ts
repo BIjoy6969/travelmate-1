@@ -2,7 +2,16 @@ import express from 'express';
 import { createTrip, getTrips, updateTrip, deleteTrip } from '../controllers/tripController';
 import { protect } from '../middleware/authMiddleware';
 
-const router = express.Router();
+const router = express.Router(); //protect:
+
+// Verifies JWT
+
+// Extracts user info
+
+// Attaches to request:
+
+// req.user = { _id: 'abc123', ... }
+
 
 router.use(protect); // Protect all trip routes
 
