@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'; //useState lets you store and update data inside the component (like email, password, and error messages)
+import { useAuth } from '../context/AuthContext'; //useAuth is a custom hook that provides authentication functionality
+import { Link, useNavigate } from 'react-router-dom'; //Link is a component that allows you to navigate to different routes in your application
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const { login } = useAuth();
-    const navigate = useNavigate();
-    const [error, setError] = useState('');
+    const [email, setEmail] = useState(''); //useState hook is used to store the email value
+    const [password, setPassword] = useState(''); //useState hook is used to store the password value
+    const { login } = useAuth(); //useAuth hook is used to access the login function from the AuthContext
+    const navigate = useNavigate(); //useNavigate hook is used to navigate to different routes in your application
+    const [error, setError] = useState(''); //useState hook is used to store the error value
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault(); //prevents the default form submission behavior
         try {
-            await login(email, password);
-            navigate('/');
+            await login(email, password); //login function is called with the email and password values
+            navigate('/'); //navigates to the home page
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Login failed');
+            setError(err.response?.data?.message || 'Login failed'); //sets the error message
         }
     };
 

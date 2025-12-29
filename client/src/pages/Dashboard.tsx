@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/api';
 import PlaceAutocomplete from '../components/PlaceAutocomplete';
-import { Trash2, MapPin, Navigation } from 'lucide-react';
+import { Trash2, MapPin, Plane, Calendar, Clock } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { getUserBookings, deleteBooking } from '../api/bookingService';
 
 interface Destination {
     _id: string;
@@ -18,6 +20,7 @@ interface Destination {
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const [destinations, setDestinations] = useState<Destination[]>([]);
+    const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchDestinations = async () => {
@@ -26,13 +29,26 @@ const Dashboard = () => {
             setDestinations(data);
         } catch (error) {
             console.error("Failed to fetch destinations", error);
-        } finally {
-            setLoading(false);
         }
     };
 
+    const fetchBookings = async () => {
+        try {
+            const data = await getUserBookings();
+            setBookings(data);
+        } catch (error) {
+            console.error("Failed to fetch bookings", error);
+        }
+    };
+
+    const loadData = async () => {
+        setLoading(true);
+        await Promise.all([fetchDestinations(), fetchBookings()]);
+        setLoading(false);
+    };
+
     useEffect(() => {
-        fetchDestinations();
+        loadData();
     }, []);
 
     const handlePlaceSelect = async (place: any) => {
@@ -63,34 +79,24 @@ const Dashboard = () => {
                 console.error("Failed to delete", error);
             }
         }
+    }
+
+
+    const handleDeleteBooking = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm("Are you sure you want to cancel this booking?")) {
+            try {
+                await deleteBooking(id);
+                setBookings(bookings.filter(b => b._id !== id));
+            } catch (error) {
+                console.error("Failed to delete booking", error);
+            }
+        }
     };
 
     return (
         <div className="min-h-screen bg-black text-gray-100 font-sans">
-            {/* Navbar */}
-            <nav className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-70">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <div className="flex items-center">
-                            <Navigation className="h-8 w-8 text-blue-500 mr-2" />
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                                Travelmate
-                            </span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link to="/profile" className="text-gray-300 hidden md:block hover:text-white transition-colors">
-                                Welcome, {user?.name}
-                            </Link>
-                            <button
-                                onClick={logout}
-                                className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors border border-gray-700"
-                            >
-                                Logout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -140,6 +146,58 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                     <div className="h-1 w-full bg-gradient-to-r from-blue-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Bookings Grid */}
+                <section>
+                    <h2 className="text-2xl font-semibold mb-6 text-white flex items-center">
+                        <Plane className="mr-2 text-blue-400" /> Your Bookings
+                    </h2>
+
+                    {loading ? (
+                        <div className="text-center py-20 text-gray-500">Loading your journeys...</div>
+                    ) : bookings.length === 0 ? (
+                        <div className="text-center py-20 bg-gray-900 rounded-2xl border border-gray-800 border-dashed">
+                            <p className="text-gray-400 text-lg">No flights booked yet.</p>
+                            <Link to="/flights" className="text-blue-500 hover:underline">Find a flight now!</Link>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-6">
+                            {bookings.map((booking) => (
+                                <div key={booking._id} className="bg-gray-800 p-6 rounded-xl border border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4 hover:border-blue-500/50 transition-colors">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="bg-blue-600/20 text-blue-400 text-xs font-bold px-2 py-1 rounded">{booking.flightData.airline}</span>
+                                            <span className={`text-xs font-bold px-2 py-1 rounded ${booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                {booking.status.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="text-2xl font-bold text-white mb-1">
+                                            {booking.flightData.origin} <span className="text-gray-500">→</span> {booking.flightData.destination}
+                                        </div>
+                                        <div className="text-gray-400 text-sm flex gap-4 items-center">
+                                            <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(booking.flightData.departureTime).toLocaleDateString()}</span>
+                                            <span className="flex items-center gap-1"><Clock size={14} /> {new Date(booking.flightData.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span>•</span>
+                                            <span>{booking.passengers} Passenger{booking.passengers > 1 ? 's' : ''}</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right flex items-center gap-6">
+                                        <div className="text-2xl font-bold text-green-400">
+                                            ${booking.totalPrice}
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteBooking(booking._id, e)}
+                                            className="text-gray-500 hover:text-red-500 p-2 rounded-full hover:bg-red-500/10 transition-colors"
+                                            title="Cancel Booking"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

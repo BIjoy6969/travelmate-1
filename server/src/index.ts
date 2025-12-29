@@ -1,7 +1,9 @@
+import 'dotenv/config';
+// Touch to trigger restart 2
 import app from './app';
 import cors from 'cors'; // Added import for cors
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 // Added CORS middleware before app.listen
 app.use(cors({
