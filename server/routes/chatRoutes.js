@@ -1,71 +1,47 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const Budget = require('../models/Budget');
-const Favorite = require('../models/Favorite');
 
-// Initialize Gemini
-// NOTE: Make sure GOOGLE_API_KEY or travelmate usage is configured. 
-// User mentioned key is "travelmate"? No, user said: Use gemini api... key is called "travelmate"
-// Wait, is "travelmate" the KEY string or the ENV VAR name?
-// "the gemini api key is called 'travelmate'" -> likely the value is 'travelmate' or I should look for a var named that?
-// Usually keys are long strings. I will assume they meant the Env Var name is `GEMINI_API_KEY` and the value is `travelmate`? 
-// Or maybe they passed a mock key? usage: `new GoogleGenerativeAI(process.env.GEMINI_API_KEY)`
-// I'll stick to standard `GEMINI_API_KEY` env var usage, or `process.env.travelmate`?
-// User said: "the gemini api key is called "travelmate"". 
-// I will try to use `process.env.travelmate` as the key.
-// But mostly likely they meant the PROJECT is TravelMate. 
-// "the gemini api key is called 'travelmate'" -> This is ambiguous. 
-// I will assume for now they mean the environment variable *name* or the *value* is available.
-// I will try to read `process.env.GEMINI_API_KEY` first, if not, try `travelmate`.
-// Actually, I'll just use a safe fallback or check the .env later if needed.
-// For now, I'll code it to use `process.env.GEMINI_API_KEY`.
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.travelmate || "travelmate");
-const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post('/', async (req, res) => {
-    const { userId, message } = req.body;
+    const { message, history } = req.body;
+
+    if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+    }
 
     try {
-        // 1. Gather Context
-        let contextString = "";
+        console.log("Chat Request received. Message:", message);
+        console.log("History length:", history ? history.length : 0);
 
-        // Fetch Budget
-        const budget = await Budget.findOne({ userId });
-        if (budget) {
-            const remaining = budget.totalBudget - budget.expenses.reduce((acc, curr) => acc + curr.amount, 0);
-            contextString += `User Budget Info: Total ${budget.totalBudget}, Remaining: ${remaining}. Trip Dates: ${budget.tripStartDate} to ${budget.tripEndDate}.\n`;
-        }
+        // Use a model suitable for chat
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-        // Fetch Favorites
-        const favorites = await Favorite.find({ userId });
-        if (favorites.length > 0) {
-            const favNames = favorites.map(f => f.name).join(', ');
-            contextString += `User Favorites: ${favNames}.\n`;
-        }
+        // Validate history: API expects alternating User/Model, starting with User ideally.
+        // If history starts with Model, we might need to adjust or prepend a dummy User message,
+        // OR just rely on the SDK/API to handle it (which it often rejects).
+        // For sanity, let's try to ensure safety.
 
-        // 2. Construct System Prompt
-        const systemPrompt = `You are TravelMate AI, a helpful travel assistant.
-    Context about the user:
-    ${contextString}
-    
-    Use this context to give personalized advice. If they ask about budget, refer to their remaining amount. If they ask for suggestions, look at their favorites.
-    User Message: ${message}`;
+        const chat = model.startChat({
+            history: history || [],
+            generationConfig: {
+                // No token limit, let the model finish naturally
+            },
+        });
 
-        // 3. Call Gemini
-        const result = await model.generateContent(systemPrompt);
+        const result = await chat.sendMessage(message);
         const response = await result.response;
         const text = response.text();
 
+        console.log("Chat Response generated successfully.");
         res.json({ reply: text });
-
     } catch (err) {
-        console.error("Gemini API Error Detail:", JSON.stringify(err, null, 2));
-        console.error("API Key present:", !!process.env.GEMINI_API_KEY);
-        // Return a 'reply' even in error so frontend displays it naturally instead of crashing
-        res.json({ reply: "I'm having a bit of trouble connecting to my brain (Google Gemini). Please check the API Key or try again later." });
+        console.error("Gemini Chat Error Details:", err);
+        console.error("Error Message:", err.message);
+        res.status(500).json({ message: "Failed to get response from AI.", error: err.message });
     }
 });
 
 module.exports = router;
+

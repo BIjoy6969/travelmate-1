@@ -5,28 +5,61 @@ const Favorite = require('../models/Favorite');
 // Get all favorites for a user
 router.get('/:userId', async (req, res) => {
     try {
-        const favorites = await Favorite.find({ userId: req.params.userId });
+        const favorites = await Favorite.find({ userId: req.params.userId }).sort({ createdAt: -1 });
         res.json(favorites);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// Add a new favorite
+// Add a new favorite (Trip Plan)
 router.post('/', async (req, res) => {
-    const { userId, destinationId, name, image, location, notes } = req.body;
+    const {
+        userId, destinationId, name, image, location, lat, lng,
+        travelStyle, totalBudget, tripStartDate, tripEndDate,
+        estimatedBreakdown, itinerary
+    } = req.body;
 
     try {
+        // Auto-calculate planNumber: count existing plans for this destination + 1
+        const existingPlans = await Favorite.countDocuments({ userId, name });
+        const planNumber = existingPlans + 1;
+
         const newFavorite = new Favorite({
             userId,
             destinationId,
             name,
             image,
             location,
-            notes
+            lat,
+            lng,
+            planNumber,
+            travelStyle,
+            totalBudget,
+            tripStartDate,
+            tripEndDate,
+            estimatedBreakdown,
+            itinerary
         });
         const savedFavorite = await newFavorite.save();
         res.status(201).json(savedFavorite);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// Update a favorite's plan data
+router.patch('/:id', async (req, res) => {
+    try {
+        const updatedFavorite = await Favorite.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!updatedFavorite) {
+            return res.status(404).json({ message: 'Favorite not found' });
+        }
+        res.json(updatedFavorite);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -42,20 +75,6 @@ router.delete('/:id', async (req, res) => {
         res.json({ message: 'Favorite deleted successfully' });
     } catch (err) {
         res.status(500).json({ message: err.message });
-    }
-});
-
-// Update notes for a favorite
-router.patch('/:id', async (req, res) => {
-    try {
-        const updatedFavorite = await Favorite.findByIdAndUpdate(
-            req.params.id,
-            { notes: req.body.notes },
-            { new: true }
-        );
-        res.json(updatedFavorite);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
     }
 });
 
