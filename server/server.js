@@ -1,37 +1,26 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+
+dotenv.config();
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected Successfully"))
-  .catch(err => console.log(err));
+// Connect Database
+connectDB();
+
+// Routes
+app.use('/api', require('./routes/api'));
 
 app.get('/', (req, res) => {
-  res.send("TravelMate API is running");
+    res.send('TravelMate API is running...');
 });
 
-const favoriteRoutes = require('./routes/favoriteRoutes');
-app.use('/api/favorites', favoriteRoutes);
-
-const budgetRoutes = require('./routes/budgetRoutes');
-app.use('/api/budget', budgetRoutes);
-
-const reviewRoutes = require('./routes/reviewRoutes');
-app.use('/api/reviews', reviewRoutes);
-
-const chatRoutes = require('./routes/chatRoutes');
-app.use('/api/chat', chatRoutes);
-
-const weatherRoutes = require('./routes/weatherRoutes');
-app.use('/api/weather', weatherRoutes);
-const destinationRoutes = require('./routes/destinationRoutes');
-app.use('/api/destinations', destinationRoutes);
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
