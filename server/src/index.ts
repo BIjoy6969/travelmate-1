@@ -3,7 +3,7 @@ import 'dotenv/config';
 import app from './app';
 import cors from 'cors'; // Added import for cors
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 1340;
 
 // Added CORS middleware before app.listen
 app.use(cors({

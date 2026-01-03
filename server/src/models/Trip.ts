@@ -1,26 +1,50 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface ITrip extends Document {
-    user: mongoose.Types.ObjectId;
+    userId?: mongoose.Types.ObjectId;
+    title: string;
     destination: string;
     startDate: Date;
     endDate: Date;
-    tripType: 'solo' | 'couple' | 'family' | 'friends' | 'business' | 'other';
-    notes?: string;
+    type: string;
     createdAt: Date;
+    updatedAt: Date;
 }
 
-const TripSchema: Schema = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    destination: { type: String, required: true },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-    tripType: { 
-        type: String, 
-        enum: ['solo', 'couple', 'family', 'friends', 'business', 'other'], 
-        required: true 
+const tripSchema: Schema = new Schema(
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: false,
+        },
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        destination: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        startDate: {
+            type: Date,
+            required: true,
+        },
+        endDate: {
+            type: Date,
+            required: true,
+        },
+        type: {
+            type: String,
+            default: "Leisure",
+            trim: true,
+        },
     },
-    notes: { type: String }
-}, { timestamps: true });
+    { timestamps: true }
+);
 
-export default mongoose.model<ITrip>('Trip', TripSchema);
+const Trip = mongoose.models.Trip || mongoose.model<ITrip>("Trip", tripSchema);
+
+export default Trip;

@@ -1,11 +1,18 @@
-import express from 'express';
-import { searchFlights } from '../controllers/flightController';
-import { protect } from '../middleware/authMiddleware';
+import express from "express";
+import {
+    getAllFlights,
+    getFlightById,
+    createFlight,
+    updateFlight,
+    deleteFlight,
+} from "../controllers/flightController";
 
 const router = express.Router();
 
-// Search flights
-// Route: GET /api/flights/search
-router.get('/search', protect, searchFlights);
+router.get("/", getAllFlights);
+router.get("/:id", getFlightById);
+router.post("/", createFlight);
+router.put("/:id", updateFlight);
+router.delete("/:id", deleteFlight);
 
 export default router;

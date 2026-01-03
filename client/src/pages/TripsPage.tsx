@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getTrips, createTrip, updateTrip, deleteTrip } from '../api/tripService';
+import { tripService } from '../services/api';
 import TripForm from '../components/TripForm';
 import Navbar from '../components/Navbar';
 
@@ -15,8 +15,8 @@ const TripsPage: React.FC = () => {
 
     const fetchTrips = async () => {
         try {
-            const data = await getTrips();
-            setTrips(data);
+            const res = await tripService.getAll();
+            setTrips(res.data);
         } catch (error) {
             console.error('Failed to fetch trips', error);
         } finally {
@@ -25,14 +25,14 @@ const TripsPage: React.FC = () => {
     };
 
     const handleCreate = async (tripData: any) => {
-        await createTrip(tripData);
+        await tripService.create(tripData);
         setShowForm(false);
         fetchTrips();
     };
 
     const handleUpdate = async (tripData: any) => {
         if (editingTrip) {
-            await updateTrip(editingTrip._id, tripData);
+            await tripService.update(editingTrip._id, tripData);
             setEditingTrip(null);
             fetchTrips();
         }
@@ -40,7 +40,7 @@ const TripsPage: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this trip?')) {
-            await deleteTrip(id);
+            await tripService.delete(id);
             fetchTrips();
         }
     };

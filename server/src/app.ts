@@ -15,6 +15,10 @@ import flightRoutes from './routes/flightRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import itineraryRoutes from './routes/itineraryRoutes';
 import hotelRoutes from './routes/hotelRoutes';
+import currencyRoutes from './routes/currencyRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import expenseRoutes from './routes/expenseRoutes';
+import exportRoutes from './routes/exportRoutes';
 
 
 
@@ -59,6 +63,10 @@ app.use('/api/flights', flightRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/itinerary', itineraryRoutes);
 app.use('/api/hotels', hotelRoutes);
+app.use('/api/currency', currencyRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/export', exportRoutes);
 
 app.get('/', (req, res) => {
     res.send('TravelMate API is running');

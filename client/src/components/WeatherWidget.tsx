@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "../api/api"; // Using configured axios instance
+import api from "../services/api"; // Using configured axios instance
 
 const WeatherWidget: React.FC = () => {
     const [city, setCity] = useState("");

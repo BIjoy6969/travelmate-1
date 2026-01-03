@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Navigation } from 'lucide-react';
+import { Navigation, Sparkles } from 'lucide-react';
 
 const Navbar: React.FC = () => {
     const { user, logout } = useAuth();
@@ -46,14 +46,20 @@ const Navbar: React.FC = () => {
                         <Link to="/flights" className="text-gray-300 hover:text-white transition-colors">
                             Flights
                         </Link>
-                        <Link to="/itinerary" className="text-gray-300 hover:text-white transition-colors">
-                            Itinerary
-                        </Link>
                         <Link to="/hotels" className="text-gray-300 hover:text-white transition-colors">
                             Hotels
                         </Link>
+                        <Link to="/itinerary" className="text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+                            <Sparkles size={14} className="text-blue-400" /> AI Planner
+                        </Link>
+                        <Link to="/chat" className="text-gray-300 hover:text-white transition-colors">
+                            AI Chat
+                        </Link>
                         <Link to="/bookings" className="text-gray-300 hover:text-white transition-colors">
                             Bookings
+                        </Link>
+                        <Link to="/expenses" className="text-gray-300 hover:text-white transition-colors">
+                            Expenses
                         </Link>
                         <Link to="/profile" className="text-gray-300 hidden md:block hover:text-white transition-colors">
                             Welcome, {user?.name}

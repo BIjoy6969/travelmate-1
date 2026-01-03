@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { searchFlights } from '../api/flightService';
-import { createBooking } from '../api/bookingService';
+import { flightService, bookingService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Plane, Search, Calendar, Users, Briefcase, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +44,7 @@ const FlightsPage = () => {
                 totalPrice: flight.price * passengers
             };
 
-            await createBooking(bookingData);
+            await bookingService.create(bookingData);
             alert("Flight booked successfully! View it in your dashboard.");
             navigate('/dashboard');
         } catch (err) {
@@ -63,7 +62,8 @@ const FlightsPage = () => {
         setFlights([]);
 
         try {
-            const data = await searchFlights({ from, to, date, adults: passengers });
+            const res = await flightService.search({ from, to, date, adults: passengers });
+            const data = res.data;
             // Backend now returns a simplified, flat array of Flight objects
             if (Array.isArray(data)) {
                 setFlights(data);

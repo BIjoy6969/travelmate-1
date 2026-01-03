@@ -1,42 +1,55 @@
-#root {
-  max-width: 1280px;
+.app-shell {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(to right,
+      rgba(15, 23, 42, 0.95),
+      rgba(15, 23, 42, 0.8));
+  backdrop-filter: blur(16px);
+}
+
+.app-logo {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: conic-gradient(from 160deg,
+      #38bdf8,
+      #a855f7,
+      #f97316,
+      #38bdf8);
+  color: #020617;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.8);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: white;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1.5rem 1.25rem 2rem;
+  max-width: 1120px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

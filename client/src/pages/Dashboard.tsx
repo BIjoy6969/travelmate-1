@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/api';
+import {
+    dashboardService,
+    exportService,
+    currencyService,
+    DEMO_USER_ID,
+    tripService
+} from "../services/api";
 import PlaceAutocomplete from '../components/PlaceAutocomplete';
-import { Trash2, MapPin, Plane, Calendar, Clock } from 'lucide-react';
+import { Trash2, MapPin, Plane, Calendar, Clock, Download, Globe, CloudSun, DollarSign, Sparkles, MessageSquare } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { getUserBookings, deleteBooking } from '../api/bookingService';
+import api from '../services/api';
 
 interface Destination {
     _id: string;
@@ -17,39 +23,96 @@ interface Destination {
     notes?: string;
 }
 
+const currencyOptions = [
+    { code: "USD", name: "USA", flag: "🇺🇸" },
+    { code: "EUR", name: "Euro", flag: "🇪🇺" },
+    { code: "GBP", name: "UK", flag: "🇬🇧" },
+    { code: "CAD", name: "Canada", flag: "🇨🇦" },
+    { code: "AUD", name: "Australia", flag: "🇦🇺" },
+    { code: "JPY", name: "Japan", flag: "🇯🇵" },
+    { code: "CNY", name: "China", flag: "🇨🇳" },
+    { code: "INR", name: "India", flag: "🇮🇳" },
+    { code: "AED", name: "UAE", flag: "🇦🇪" },
+    { code: "SAR", name: "Saudi", flag: "🇸🇦" },
+    { code: "BDT", name: "Bangladesh", flag: "🇧🇩" },
+];
+
 const Dashboard = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // Stats and DB data
     const [destinations, setDestinations] = useState<Destination[]>([]);
     const [bookings, setBookings] = useState<any[]>([]);
+    const [dashData, setDashData] = useState<any>(null);
+
+    // UI State
+    const [city, setCity] = useState("");
+    const [lastSearchedCity, setLastSearchedCity] = useState("");
+    const [base, setBase] = useState("USD");
+    const [target, setTarget] = useState("BDT");
+    const [amount, setAmount] = useState(100);
+
     const [loading, setLoading] = useState(true);
+    const [loadingCur, setLoadingCur] = useState(false);
+    const [error, setError] = useState("");
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-    const fetchDestinations = async () => {
-        try {
-            const { data } = await api.get('/destinations');
-            setDestinations(data);
-        } catch (error) {
-            console.error("Failed to fetch destinations", error);
-        }
-    };
+    // Currency values
+    const [curRate, setCurRate] = useState<number | null>(null);
+    const [curResult, setCurResult] = useState<number | null>(null);
 
-    const fetchBookings = async () => {
-        try {
-            const data = await getUserBookings();
-            setBookings(data);
-        } catch (error) {
-            console.error("Failed to fetch bookings", error);
-        }
-    };
+    const fmt = (n: number | null) =>
+        typeof n === "number"
+            ? n.toLocaleString(undefined, { maximumFractionDigits: 4 })
+            : "—";
 
     const loadData = async () => {
         setLoading(true);
-        await Promise.all([fetchDestinations(), fetchBookings()]);
-        setLoading(false);
+        setError("");
+        try {
+            const [destRes, dashRes] = await Promise.all([
+                api.get('/destinations'),
+                dashboardService.getDashboard({
+                    userId: user?._id || DEMO_USER_ID,
+                    city: city || undefined,
+                    base,
+                    target
+                })
+            ]);
+
+            setDestinations(destRes.data);
+            setDashData(dashRes.data);
+            setBookings(dashRes.data.flights || []);
+            setLastUpdated(new Date());
+
+            if (city) {
+                setLastSearchedCity(city);
+                const dashCurrency = dashRes.data?.currency;
+                if (dashCurrency?.rate != null) {
+                    setCurRate(dashCurrency.rate);
+                    setCurResult(dashCurrency.rate * amount);
+                }
+            } else {
+                setLastSearchedCity("");
+                setCurRate(null);
+                setCurResult(null);
+            }
+        } catch (err: any) {
+            console.error("Dashboard failed to load", err);
+            setError("Failed to load dashboard data.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         loadData();
     }, []);
+
+    const handleSearch = () => {
+        loadData();
+    };
 
     const handlePlaceSelect = async (place: any) => {
         try {
@@ -66,12 +129,11 @@ const Dashboard = () => {
             setDestinations([...destinations, data]);
         } catch (error) {
             console.error("Failed to add destination", error);
-            alert("Failed to save destination.");
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (confirm("Are you sure you want to delete this destination?")) {
+    const handleDeleteDest = async (id: string) => {
+        if (window.confirm("Are you sure?")) {
             try {
                 await api.delete(`/destinations/${id}`);
                 setDestinations(destinations.filter(d => d._id !== id));
@@ -79,130 +141,214 @@ const Dashboard = () => {
                 console.error("Failed to delete", error);
             }
         }
-    }
-
-
-    const handleDeleteBooking = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (confirm("Are you sure you want to cancel this booking?")) {
-            try {
-                await deleteBooking(id);
-                setBookings(bookings.filter(b => b._id !== id));
-            } catch (error) {
-                console.error("Failed to delete booking", error);
-            }
-        }
     };
 
+    const exportPDF = () => {
+        exportService.exportPDF({
+            userId: user?._id || DEMO_USER_ID,
+            city: lastSearchedCity || undefined,
+            base,
+            target,
+            amount
+        });
+    };
+
+    const stats = useMemo(() => {
+        const trips = dashData?.trips?.length ?? 0;
+        const totalFlights = bookings.length;
+        const totalSpent = Number(dashData?.totalSpent ?? 0);
+        return { trips, totalFlights, totalSpent };
+    }, [dashData, bookings]);
+
+    const weather = dashData?.weather;
+    const weatherTemp = weather?.temperature ?? null;
+
     return (
-        <div className="min-h-screen bg-black text-gray-100 font-sans">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
             <Navbar />
 
-            {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-                {/* Search Section */}
-                <section className="bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800">
-                    <h2 className="text-2xl font-semibold mb-4 text-white">Add New Destination</h2>
-                    <div className="relative">
-                        <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} />
+                {/* Header & Export */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+                        <p className="text-slate-500 mt-1">Travel summary for {user?.name || 'Guest'}</p>
                     </div>
-                    <p className="text-gray-500 text-sm mt-3">
-                        Search for a city, landmark, or specific address to add it to your bucket list.
-                    </p>
-                </section>
+                    <button
+                        onClick={exportPDF}
+                        className="tm-btn-secondary flex items-center gap-2"
+                    >
+                        <Download size={18} /> Export Report (PDF)
+                    </button>
+                </div>
 
-                {/* Destinations Grid */}
-                <section>
-                    <h2 className="text-2xl font-semibold mb-6 text-white flex items-center">
-                        <MapPin className="mr-2 text-emerald-400" /> Your Saved Places
-                    </h2>
+                {/* Hero Search Section */}
+                <div className="relative overflow-hidden rounded-2xl bg-blue-600 text-white shadow-xl">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-90"></div>
+                    <div
+                        className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay opacity-40"
+                    />
 
-                    {loading ? (
-                        <div className="text-center py-20 text-gray-500">Loading your world...</div>
-                    ) : destinations.length === 0 ? (
-                        <div className="text-center py-20 bg-gray-900 rounded-2xl border border-gray-800 border-dashed">
-                            <p className="text-gray-400 text-lg">No destinations saved yet.</p>
-                            <p className="text-gray-600">Start by searching above!</p>
+                    <div className="relative p-8 md:p-10">
+                        <h2 className="text-center text-2xl font-bold mb-6">Explore & Tools</h2>
+
+                        <div className="bg-white rounded-xl p-4 md:p-6 text-slate-900 shadow-lg grid gap-4 md:grid-cols-12">
+                            <div className="md:col-span-4">
+                                <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Destination</label>
+                                <input
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    className="tm-input mt-1"
+                                    placeholder="Enter city for weather/rates"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                />
+                            </div>
+                            <div className="md:col-span-3">
+                                <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Base Currency</label>
+                                <select
+                                    className="tm-select mt-1"
+                                    value={base}
+                                    onChange={(e) => setBase(e.target.value)}
+                                >
+                                    {currencyOptions.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
+                                </select>
+                            </div>
+                            <div className="md:col-span-3">
+                                <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Target Currency</label>
+                                <select
+                                    className="tm-select mt-1"
+                                    value={target}
+                                    onChange={(e) => setTarget(e.target.value)}
+                                >
+                                    {currencyOptions.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
+                                </select>
+                            </div>
+                            <div className="md:col-span-2 flex items-end">
+                                <button
+                                    onClick={handleSearch}
+                                    className="tm-btn-primary w-full py-2.5"
+                                >
+                                    Update
+                                </button>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {destinations.map((dest) => (
-                                <div key={dest._id} className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/10 group">
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">{dest.name}</h3>
-                                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">{dest.address}</p>
-                                        <div className="flex justify-between items-end mt-4">
-                                            <div className="text-xs text-gray-600 font-mono">
-                                                {dest.lat.toFixed(4)}, {dest.lng.toFixed(4)}
-                                            </div>
-                                            <button
-                                                onClick={() => handleDelete(dest._id)}
-                                                className="text-gray-500 hover:text-red-500 p-2 rounded-full hover:bg-red-500/10 transition-colors"
-                                                title="Remove destination"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="h-1 w-full bg-gradient-to-r from-blue-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </section>
+                    </div>
+                </div>
 
-                {/* Bookings Grid */}
-                <section>
-                    <h2 className="text-2xl font-semibold mb-6 text-white flex items-center">
-                        <Plane className="mr-2 text-blue-400" /> Your Bookings
-                    </h2>
-
-                    {loading ? (
-                        <div className="text-center py-20 text-gray-500">Loading your journeys...</div>
-                    ) : bookings.length === 0 ? (
-                        <div className="text-center py-20 bg-gray-900 rounded-2xl border border-gray-800 border-dashed">
-                            <p className="text-gray-400 text-lg">No flights booked yet.</p>
-                            <Link to="/flights" className="text-blue-500 hover:underline">Find a flight now!</Link>
+                {/* Snapshots Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Stats */}
+                    <div className="tm-card flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold uppercase text-slate-400">Total Spent</span>
+                            <DollarSign size={16} className="text-emerald-500" />
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-6">
-                            {bookings.map((booking) => (
-                                <div key={booking._id} className="bg-gray-800 p-6 rounded-xl border border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4 hover:border-blue-500/50 transition-colors">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span className="bg-blue-600/20 text-blue-400 text-xs font-bold px-2 py-1 rounded">{booking.flightData.airline}</span>
-                                            <span className={`text-xs font-bold px-2 py-1 rounded ${booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                {booking.status.toUpperCase()}
-                                            </span>
+                        <div className="text-3xl font-bold">৳{stats.totalSpent.toLocaleString()}</div>
+                        <div className="text-xs text-slate-500 mt-2">{stats.trips} Trips • {stats.totalFlights} Bookings</div>
+                    </div>
+
+                    {/* Weather */}
+                    <div className="tm-card bg-sky-50/50 border-sky-100">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold uppercase text-sky-600">Local Weather</span>
+                            <CloudSun size={16} className="text-sky-500" />
+                        </div>
+                        {weather ? (
+                            <>
+                                <div className="text-3xl font-bold">{weatherTemp !== null ? `${Math.round(weatherTemp)}°C` : '—'}</div>
+                                <div className="text-sm font-medium text-slate-600 capitalize">{weather.description || '—'}</div>
+                                <div className="text-xs text-slate-400 mt-1">{lastSearchedCity || weather.city}</div>
+                            </>
+                        ) : (
+                            <div className="text-sm text-slate-400 mt-4">Search a city to see weather.</div>
+                        )}
+                    </div>
+
+                    {/* AI Insights Quick View */}
+                    <div className="tm-card bg-indigo-50/50 border-indigo-100 flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold uppercase text-indigo-600">AI Assistant Insights</span>
+                            <Sparkles size={16} className="text-indigo-500" />
+                        </div>
+                        <div className="text-sm text-slate-600 italic">
+                            "Based on your favorites, you might enjoy exploring cultural festivals in Osaka this spring."
+                        </div>
+                        <Link to="/chat" className="text-xs text-indigo-600 font-bold mt-2 flex items-center gap-1 hover:underline">
+                            <MessageSquare size={12} /> Ask AI for more tips
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Bottom Sections */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Saved Places */}
+                    <section className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <MapPin className="text-emerald-500" /> Saved Places
+                            </h2>
+                            <Link to="/explore" className="text-sm text-blue-600 font-semibold hover:underline">View All</Link>
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                            <PlaceAutocomplete onPlaceSelect={handlePlaceSelect} />
+                            <div className="mt-6 space-y-3">
+                                {destinations.slice(-3).reverse().map(dest => (
+                                    <div key={dest._id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <div>
+                                            <p className="font-bold text-sm">{dest.name}</p>
+                                            <p className="text-xs text-slate-500">{dest.address}</p>
                                         </div>
-                                        <div className="text-2xl font-bold text-white mb-1">
-                                            {booking.flightData.origin} <span className="text-gray-500">→</span> {booking.flightData.destination}
-                                        </div>
-                                        <div className="text-gray-400 text-sm flex gap-4 items-center">
-                                            <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(booking.flightData.departureTime).toLocaleDateString()}</span>
-                                            <span className="flex items-center gap-1"><Clock size={14} /> {new Date(booking.flightData.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            <span>•</span>
-                                            <span>{booking.passengers} Passenger{booking.passengers > 1 ? 's' : ''}</span>
-                                        </div>
-                                    </div>
-                                    <div className="text-right flex items-center gap-6">
-                                        <div className="text-2xl font-bold text-green-400">
-                                            ${booking.totalPrice}
-                                        </div>
-                                        <button
-                                            onClick={(e) => handleDeleteBooking(booking._id, e)}
-                                            className="text-gray-500 hover:text-red-500 p-2 rounded-full hover:bg-red-500/10 transition-colors"
-                                            title="Cancel Booking"
-                                        >
-                                            <Trash2 size={20} />
+                                        <button onClick={() => handleDeleteDest(dest._id)} className="text-slate-400 hover:text-red-500 p-1">
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
+                                ))}
+                                {destinations.length === 0 && <p className="text-center text-slate-400 py-4 text-sm">No places saved yet.</p>}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Recent Bookings */}
+                    <section className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <Plane className="text-blue-500" /> Active Bookings
+                            </h2>
+                            <Link to="/bookings" className="text-sm text-blue-600 font-semibold hover:underline">Full History</Link>
+                        </div>
+
+                        <div className="space-y-4">
+                            {bookings.slice(0, 3).map((booking: any) => (
+                                <div key={booking._id} className="tm-card flex items-center gap-4 hover:shadow-md transition-shadow">
+                                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <Plane size={20} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{booking.flightData?.airline || 'Flight'}</span>
+                                            <span className="text-sm font-bold text-emerald-600">${booking.totalPrice}</span>
+                                        </div>
+                                        <div className="font-bold">{booking.flightData?.origin} → {booking.flightData?.destination}</div>
+                                        <div className="text-xs text-slate-500 flex items-center gap-3 mt-1">
+                                            <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(booking.flightData?.departureTime).toLocaleDateString()}</span>
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${booking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                {booking.status}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
+                            {bookings.length === 0 && (
+                                <div className="tm-panel border-dashed flex flex-col items-center py-8 text-center">
+                                    <p className="text-slate-500 font-medium">No active journeys</p>
+                                    <Link to="/flights" className="text-sm text-blue-600 mt-2 underline">Book your first flight →</Link>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </section>
+                    </section>
+                </div>
             </main>
         </div>
     );

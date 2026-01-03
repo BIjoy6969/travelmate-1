@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import api, { setAccessToken } from '../api/api';
+import api, { setAccessToken } from '../services/api';
 
 interface User {
     _id: string;

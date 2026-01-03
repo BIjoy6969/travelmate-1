@@ -1,0 +1,15 @@
+services:
+  # TravelMate Backend Service
+  - type: web
+    name: travelmate-backend
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false # User must set this in dashboard
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: OPENWEATHER_BASE_URL
+        value: https://api.openweathermap.org/data/2.5
