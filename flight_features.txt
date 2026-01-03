@@ -1,0 +1,73 @@
+
+# Flight Features Architecture & Data Flow Explanation
+# Prepared for Viva Voce
+
+================================================================================
+1. High-Level Architecture
+================================================================================
+Your flight feature follows a Full-Stack Flow using the MERN stack (MongoDB, Express, React, Node.js).
+- Data Source: You are NOT storing flight schedules in your database. You are fetching them in real-time from an external API called `flightapi.io`.
+- Backend Role: Your backend acts as a Proxy and Transformer. It hides your API key from the client and reshapes the messy external data into a clean format for your frontend.
+- Frontend Role: Handles user input and displays the clean data.
+
+================================================================================
+2. The Flight Search "Lifecycle" (Detailed Flow)
+================================================================================
+Question: "What happens when I click Search?"
+
+Step 1: Frontend Request
+- User enters "LHR" (London) to "JFK" (New York) on `FlightsPage.tsx`.
+- Function: `handleSearch` calls `flightService.searchFlights`.
+- Request: `GET /api/flights/search?from=LHR&to=JFK&date=2024-12-25...` sent to your server.
+
+Step 2: Backend Processing (`flightController.ts`)
+- Validation: Server checks if `from`, `to`, and `date` are present.
+- External API Call: Your server makes a request to `https://api.flightapi.io/onewaytrip/...`.
+    - Purpose: This keeps your `FLIGHT_API_KEY` secure on the server (env variable).
+- Data Transformation (The "Intelligence" Part):
+    - The external API returns "Normalized" data (separate lists for `legs`, `segments`, `carriers`, `places`). It is normalized to save bandwidth but is hard to read.
+    - Your Code: You use `Map` data structures (`legsMap`, `carriersMap`) to "stitch" this data back together.
+    - Example: It takes a `leg_id`, finds the `segment`, matches the `carrier_id` to get "British Airways", and looks up `place_id` to get "Heathrow Airport".
+- Response: The server sends back a simplified list of objects: `{ airline: "British Airways", price: 500, duration: "7h 30m" ... }`.
+
+Step 3: Frontend Display
+- `FlightsPage` receives the list and maps over it to display the flight cards.
+
+================================================================================
+3. The Booking "Lifecycle"
+================================================================================
+Question: "How is a booking handled?"
+
+Step 1: User Action
+- User clicks "Book Now" on a flight card.
+- Function: `handleBooking` constructs a JSON object containing the flight details (airline, price, time) and user info.
+
+Step 2: API Call
+- Request: `POST /api/bookings`
+- Security: The request includes a JWT Bearer Token (handled by `useAuth` context). The backend `protect` middleware verifies this token to know *who* is booking.
+
+Step 3: Database Save (`bookingController.ts`)
+- No External Booking: You are NOT sending this booking to the airline. You are creating a record in your local MongoDB database.
+- Model: A new `Booking` document is created with:
+    - `user`: The User ID from the token.
+    - `flightData`: A snapshot of the flight details.
+    - `status`: Defaults to "confirmed".
+- Result: The booking is saved, and the user is redirected to the Dashboard.
+
+================================================================================
+4. Key Viva Questions & Answers
+================================================================================
+
+Q: Where is the flight data stored?
+A: "It is not stored locally. We use a Proxy Pattern to fetch live data from `flightapi.io`. My backend queries their API, processes the raw data to make it usable, and sends it to the frontend."
+
+Q: Why do you process data on the backend?
+A: "Two reasons:
+   1. Security: To keep the API Key hidden from the browser.
+   2. Efficiency: The external API returns complex, normalized data. The backend transforms this into a simple format so the frontend code stays clean and lightweight."
+
+Q: Is this a real booking?
+A: "It creates a confirmed record in *our* system for the user's itinerary/dashboard, but it interacts with a mock payment flow (or no payment flow) and does not push a transaction to the actual airline system (GDS) as that requires enterprise credentials."
+
+Q: How do you handle authentication?
+A: "I use JWT (JSON Web Tokens). When a user logs in, they get a token. Every request to `/api/bookings` sends this token in the header. The `protect` middleware verifies the signature to ensure the user is valid before allowing access."

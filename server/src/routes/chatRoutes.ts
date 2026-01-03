@@ -7,11 +7,13 @@ const router = express.Router();
 
 // Initialize Gemini
 // NOTE: Using process.env.GEMINI_API_KEY as standard, fallback to 'travelmate' if env var name is 'travelmate'
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.travelmate || "travelmate");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Updated model name to current valid one if 'gemini-flash-latest' is old, but keeping logic similar
+const apiKey = process.env.GEMINI_API_KEY || process.env.travelmate || "travelmate";
+const genAI = new GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
 router.post('/', async (req: Request, res: Response) => {
     const { userId, message } = req.body;
+    console.log("Chat request for user:", userId);
 
     try {
         // 1. Gather Context
