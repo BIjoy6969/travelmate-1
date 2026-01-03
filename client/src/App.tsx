@@ -12,6 +12,9 @@ import AIChat from './pages/AIChat';
 import WeatherPage from './pages/WeatherPage';
 import FlightsPage from './pages/FlightsPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import ItineraryGenerator from './pages/ItineraryGenerator';
+import HotelSearch from './pages/HotelSearch';
+import BookingHistory from './pages/BookingHistory';
 
 function App() {
     return (
@@ -30,6 +33,9 @@ function App() {
                     <Route path="/chat" element={<AIChat />} />
                     <Route path="/weather" element={<WeatherPage />} />
                     <Route path="/flights" element={<FlightsPage />} />
+                    <Route path="/itinerary" element={<ItineraryGenerator />} />
+                    <Route path="/hotels" element={<HotelSearch />} />
+                    <Route path="/bookings" element={<BookingHistory />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />

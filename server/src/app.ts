@@ -13,6 +13,8 @@ import chatRoutes from './routes/chatRoutes';
 import weatherRoutes from './routes/weatherRoutes';
 import flightRoutes from './routes/flightRoutes';
 import bookingRoutes from './routes/bookingRoutes';
+import itineraryRoutes from './routes/itineraryRoutes';
+import hotelRoutes from './routes/hotelRoutes';
 
 
 
@@ -55,6 +57,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/itinerary', itineraryRoutes);
+app.use('/api/hotels', hotelRoutes);
 
 app.get('/', (req, res) => {
     res.send('TravelMate API is running');

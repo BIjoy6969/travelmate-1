@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IBooking extends Document {
     user: mongoose.Schema.Types.ObjectId;
-    flightData: {
+    flightData?: {
         airline: string;
         flightNumber?: string;
         departureTime: string;
@@ -15,10 +15,18 @@ export interface IBooking extends Document {
         stops?: number;
         deepLink?: string;
     };
-    passengers: number;
+    hotelData?: {
+        hotelId: string;
+        hotelName: string;
+        location: string;
+        checkIn: Date;
+        checkOut: Date;
+        guests: number;
+        price: number;
+    };
     totalPrice: number;
     bookingDate: Date;
-    status: 'confirmed' | 'cancelled';
+    status: 'confirmed' | 'cancelled' | 'booked';
 }
 
 const BookingSchema: Schema = new Schema({
@@ -28,22 +36,26 @@ const BookingSchema: Schema = new Schema({
         required: true,
     },
     flightData: {
-        airline: { type: String, required: true },
+        airline: { type: String },
         flightNumber: { type: String },
-        departureTime: { type: String, required: true },
-        arrivalTime: { type: String, required: true },
-        origin: { type: String, required: true },
-        destination: { type: String, required: true },
-        price: { type: Number, required: true },
+        departureTime: { type: String },
+        arrivalTime: { type: String },
+        origin: { type: String },
+        destination: { type: String },
+        price: { type: Number },
         currency: { type: String, default: 'USD' },
         duration: { type: String },
         stops: { type: Number, default: 0 },
         deepLink: { type: String },
     },
-    passengers: {
-        type: Number,
-        required: true,
-        min: 1,
+    hotelData: {
+        hotelId: { type: String },
+        hotelName: { type: String },
+        location: { type: String },
+        checkIn: { type: Date },
+        checkOut: { type: Date },
+        guests: { type: Number },
+        price: { type: Number },
     },
     totalPrice: {
         type: Number,
@@ -55,7 +67,7 @@ const BookingSchema: Schema = new Schema({
     },
     status: {
         type: String,
-        enum: ['confirmed', 'cancelled'],
+        enum: ['confirmed', 'cancelled', 'booked'],
         default: 'confirmed',
     },
 }, {

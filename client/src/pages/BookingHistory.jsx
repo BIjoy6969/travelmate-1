@@ -7,7 +7,7 @@ const BookingHistory = () => {
 
     const fetchBookings = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/bookings/guest_123');
+            const res = await axios.get('http://localhost:1340/api/bookings/guest_123');
             setBookings(res.data);
         } catch (err) {
             console.error(err);
@@ -23,7 +23,7 @@ const BookingHistory = () => {
     const cancelBooking = async (id) => {
         if (!confirm('Are you sure you want to cancel this booking?')) return;
         try {
-            await axios.put(`http://localhost:5000/api/bookings/${id}/cancel`);
+            await axios.put(`http://localhost:1340/api/bookings/${id}/cancel`);
             fetchBookings(); // Refresh
         } catch (err) {
             alert('Error cancelling booking');

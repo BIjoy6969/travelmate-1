@@ -11,7 +11,7 @@ const ItineraryGenerator = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/itinerary', formData);
+            const res = await axios.post('http://localhost:1340/api/itinerary', formData);
             setItinerary(res.data);
         } catch (err) {
             console.error(err);

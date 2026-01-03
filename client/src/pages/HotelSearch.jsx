@@ -12,7 +12,7 @@ const HotelSearch = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/hotels/search', {
+            const res = await axios.get('http://localhost:1340/api/hotels/search', {
                 params: { location }
             });
             setHotels(res.data);
@@ -36,7 +36,7 @@ const HotelSearch = () => {
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
 
-            await axios.post('http://localhost:5000/api/bookings', {
+            await axios.post('http://localhost:1340/api/bookings', {
                 userId: 'guest_123',
                 hotelId: hotel.hotel_id,
                 hotelName: hotel.hotel_name,
