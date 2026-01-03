@@ -1,39 +1,28 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import FavoritesPage from './pages/FavoritesPage';
-import BudgetTracker from './pages/BudgetTracker';
-import AIChat from './pages/AIChat';
-import './App.css'
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import ItineraryGenerator from './pages/ItineraryGenerator';
+import HotelSearch from './pages/HotelSearch';
+import BookingHistory from './pages/BookingHistory';
 
 function App() {
-  return (
-    <Router>
-      <div className="app-container min-h-screen bg-gray-50">
-        {/* Temporary Navigation for Member 3 Dev */}
-        <nav className="bg-white shadow p-4 mb-4">
-          <div className="max-w-7xl mx-auto flex gap-4">
-            <Link to="/" className="text-blue-600 font-bold hover:underline">Home</Link>
-            <Link to="/favorites" className="text-blue-600 font-bold hover:underline">Favorites</Link>
-            <Link to="/budget" className="text-blue-600 font-bold hover:underline">Budget</Link>
-            <Link to="/chat" className="text-blue-600 font-bold hover:underline">AI Assistant</Link>
-          </div>
-        </nav>
-
-        <Routes>
-          <Route path="/" element={
-            <div className="p-8 text-center">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">TravelMate</h1>
-              <p className="text-xl text-gray-600">Welcome to your ultimate travel companion.</p>
-              <p className="mt-4 text-sm text-gray-400">Navigate to 'Favorites', 'Budget', or 'AI Assistant'.</p>
-            </div>
-          } />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/budget" element={<BudgetTracker />} />
-          <Route path="/chat" element={<AIChat />} />
-        </Routes>
-      </div>
-    </Router>
-  )
+    return (
+        <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow container mx-auto px-4 py-8">
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/itinerary" element={<ItineraryGenerator />} />
+                    <Route path="/hotels" element={<HotelSearch />} />
+                    <Route path="/bookings" element={<BookingHistory />} />
+                </Routes>
+            </main>
+            <footer className="bg-gray-800 text-white p-4 text-center">
+                <p>&copy; 2024 TravelMate. All rights reserved.</p>
+            </footer>
+        </div>
+    );
 }
 
-export default App
-
+export default App;
