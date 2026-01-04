@@ -58,6 +58,31 @@ exports.getTopDestinations = async (req, res) => {
                 details: error.response.data
             });
         }
-        res.status(500).json({ message: 'Server Error fetching destinations', error: error.message });
+        // Fallback to demo data if no specific API response error
+        console.error('Destinations API Error - Falling back to demo data:', error.message);
+        const demoDestinations = [
+            {
+                location_id: '1',
+                name: 'Cox\'s Bazar',
+                location: 'Chittagong Division, Bangladesh',
+                image: 'https://images.unsplash.com/photo-1583323755498-8fec00109968?auto=format&fit=crop&q=80&w=800',
+                rating: '4.8'
+            },
+            {
+                location_id: '2',
+                name: 'Paris',
+                location: 'Ile-de-France, France',
+                image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=800',
+                rating: '4.9'
+            },
+            {
+                location_id: '3',
+                name: 'Bali',
+                location: 'Indonesia',
+                image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=800',
+                rating: '4.7'
+            }
+        ];
+        res.json({ data: demoDestinations });
     }
 };

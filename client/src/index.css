@@ -2,29 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-<<<<<<< HEAD
 @layer base {
   body {
-    @apply bg-minimal-bg text-minimal-text antialiased;
+    @apply bg-slate-50 text-slate-900 antialiased;
     font-family: "Inter", system-ui, sans-serif;
   }
 }
 
 @layer components {
+
+  /* Member 3 / Unified Minimal Design */
   .card-minimal {
-    @apply bg-white border border-minimal-border rounded-xl shadow-minimal-sm transition-all duration-200 hover:shadow-minimal-md;
+    @apply bg-white border border-slate-200 rounded-xl shadow-sm transition-all duration-200 hover:shadow-md;
   }
 
   .btn-minimal-primary {
-    @apply bg-brand-800 text-white px-5 py-2 rounded-lg font-medium transition-all hover:bg-brand-900 active:scale-[0.98] disabled:opacity-50;
+    @apply bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium transition-all hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50;
   }
 
   .btn-minimal-secondary {
-    @apply bg-white border border-minimal-border text-minimal-text px-5 py-2 rounded-lg font-medium transition-all hover:bg-minimal-surface active:scale-[0.98];
+    @apply bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium transition-all hover:bg-slate-50 active:scale-[0.98];
   }
 
   .input-minimal {
-    @apply bg-white border border-minimal-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-400 focus:border-brand-400 transition-all text-minimal-text placeholder:text-minimal-muted;
+    @apply bg-white border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 transition-all text-slate-900 placeholder:text-slate-400;
+  }
+
+  /* Member 4 / Gozayaan Style */
+  .tm-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+
+  .tm-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .tm-input,
+  .tm-select,
+  textarea.tm-input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .tm-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    background: #facc15;
+    box-shadow: 0 2px 10px rgba(250, 204, 21, 0.3);
+    transition: all 0.2s;
+  }
+
+  .tm-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
   }
 }
 
@@ -37,10 +101,9 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-minimal-border rounded-full hover:bg-minimal-muted/30 transition-colors;
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
 }
 
-/* Simple fade in */
 .animate-in-faded {
   animation: fadeInFaded 0.5s ease-out;
 }
@@ -55,248 +118,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-=======
-/* ===== Global Theme ===== */
-/* ===== Global Theme (Gozayaan / Light Mode) ===== */
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  /* Professional Colorful Background */
-  background-color: #f8fafc;
-  background-image:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
-  background:
-    radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 25%),
-    linear-gradient(to bottom right, #f8fafc, #f1f5f9);
-  color: #0f172a;
-  /* Slate-900 */
-}
-
-/* ===== Scrollbar ===== */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* =========================================================
-   TM UI System (Gozayaan Light Theme)
-   ========================================================= */
-
-/* Center pages */
-.tm-page {
-  max-width: 1140px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 0 16px;
-}
-
-/* Cards: White clean look */
-.tm-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-}
-
-/* Panels: Softer background */
-.tm-panel {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-/* Badge */
-.tm-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 600;
-  background: #e0f2fe;
-  /* Light Sky */
-  color: #0284c7;
-  /* Dark Sky */
-}
-
-/* =======================
-   Inputs
-   ======================= */
-.tm-input,
-.tm-select,
-textarea.tm-input {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.tm-input::placeholder {
-  color: #94a3b8;
-}
-
-.tm-input:focus,
-.tm-select:focus {
-  border-color: #facc15;
-  /* Yellow focus border */
-  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.15);
-}
-
-/* =======================
-   Buttons (Gozayaan / Agoda style)
-   ======================= */
-/* Primary: Yellow with dark text */
-.tm-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #0f172a;
-  background: #facc15;
-  /* Canary Yellow */
-  box-shadow: 0 2px 10px rgba(250, 204, 21, 0.3);
-  transition: all 0.2s;
-}
-
-.tm-btn-primary:hover {
-  background: #eab308;
-  transform: translateY(-1px);
-}
-
-.tm-btn-primary:active {
-  transform: translateY(0);
-}
-
-.tm-btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: #e2e8f0;
-  color: #94a3b8;
-  box-shadow: none;
-}
-
-/* Secondary: White with border or Subtle Gray */
-.tm-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s;
-}
-
-.tm-btn-secondary:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
-}
-
-/* =======================
-   Typography
-   ======================= */
-h1,
-h2,
-h3 {
-  margin: 0;
-  color: #0f172a;
-}
-
-.tm-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.tm-subtitle {
-  font-size: 0.95rem;
-  color: #64748b;
-  margin-top: 4px;
-}
-
-/* =======================
-   Navigation Bar (Light)
-   ======================= */
-.tm-nav-row {
-  display: flex;
-  gap: 8px;
-  padding: 12px 0;
-  overflow-x: auto;
-}
-
-.tm-nav-btn {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 99px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #475569;
-  transition: all 0.2s;
-}
-
-.tm-nav-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.tm-nav-btn.is-active {
-  background: #0f172a;
-  /* Dark Blue active bg */
-  color: #facc15;
-  /* Yellow text */
-  font-weight: 600;
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);
-}
-
-.tm-nav-ico {
-  font-size: 16px;
-}
-
-.tm-nav-text {
-  white-space: nowrap;
->>>>>>> origin/member4-bijoy
 }

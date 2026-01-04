@@ -1,287 +1,325 @@
-import { useEffect, useMemo, useState } from "react";
-import { flightService, DEMO_USER_ID } from "../services/api";
+import React, { useState, useEffect } from 'react';
+import { Plane, Search, Plus, Trash2, Calendar, MapPin, Loader2, Info, ArrowRight } from 'lucide-react';
+import axios from 'axios';
 
-export default function Flights() {
-  const [from, setFrom] = useState("DAC");
-  const [to, setTo] = useState("DXB");
-  const [date, setDate] = useState("");
-  const [searching, setSearching] = useState(false);
+const Flights = () => {
+  // Search State
+  const [searchForm, setSearchForm] = useState({
+    from: 'DAC',
+    to: 'DXB',
+    date: new Date().toISOString().split('T')[0],
+    adults: 1,
+    cabinClass: 'Economy'
+  });
   const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
-  const [saved, setSaved] = useState([]);
-  const [loadingSaved, setLoadingSaved] = useState(true);
+  // Bookings State
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [error, setError] = useState('');
 
+  // UI State
   const [showManual, setShowManual] = useState(false);
-  const [manual, setManual] = useState({
-    from: "",
-    to: "",
-    date: "",
-    price: "",
-    airline: "",
-    bookingRef: "",
+  const [manualForm, setManualForm] = useState({
+    from: '', to: '', date: '', airline: '', price: '', bookingRef: ''
   });
 
-  const [error, setError] = useState("");
+  const storedUser = JSON.parse(localStorage.getItem('user')) || { userId: '000000000000000000000001' };
+  const userId = storedUser.userId;
 
-  const canSearch = useMemo(() => from.trim() && to.trim() && date, [from, to, date]);
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
-  const loadSaved = async () => {
-    setError("");
-    setLoadingSaved(true);
+  const fetchBookings = async () => {
+    setLoadingBookings(true);
     try {
-      if (flightService.bookings) {
-        const res = await flightService.bookings(DEMO_USER_ID);
-        setSaved(res.data || []);
-      } else {
-        const res = await flightService.getAll(DEMO_USER_ID);
-        setSaved(res.data || []);
-      }
-    } catch {
-      setSaved([]);
-      setError("Failed to load bookings.");
+      const res = await axios.get('/api/flights/bookings', { params: { userId } });
+      setBookings(res.data);
+    } catch (err) {
+      console.error('Failed to fetch bookings', err);
+      setError('Could not load your bookings.');
     } finally {
-      setLoadingSaved(false);
+      setLoadingBookings(false);
     }
   };
 
-  useEffect(() => {
-    loadSaved();
-  }, []);
-
-  const handleSearch = async () => {
-    if (!canSearch) return;
-    setError("");
+  const handleSearch = async (e) => {
+    e.preventDefault();
     setSearching(true);
-
+    setError('');
     try {
-      if (flightService.search) {
-        const res = await flightService.search(from.trim(), to.trim(), date);
-        const list = res.data?.results || res.data || [];
-        setSearchResults(list);
-      } else {
-        const demo = [
-          { airline: "SkyWays", price: 510, from, to, date, bookingRef: `DEMO-${Date.now()}-1` },
-          { airline: "Cloud Jet", price: 610, from, to, date, bookingRef: `DEMO-${Date.now()}-2` },
-          { airline: "Demo Air", price: 420, from, to, date, bookingRef: `DEMO-${Date.now()}-3` },
-        ];
-        setSearchResults(demo);
-      }
-    } catch {
-      setSearchResults([]);
-      setError("Search failed.");
+      const res = await axios.get('/api/flights/search', { params: searchForm });
+      setSearchResults(res.data);
+      if (res.data.length === 0) setError('No flights found for these criteria.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Flight search failed. Please try again.');
     } finally {
       setSearching(false);
     }
   };
 
-  const bookFlight = async (f) => {
-    setError("");
+  const bookFlight = async (flight) => {
     try {
-      if (flightService.book) {
-        await flightService.book({ ...f, userId: DEMO_USER_ID });
-      } else {
-        await flightService.create({
-          ...f,
-          userId: DEMO_USER_ID,
-          price: Number(f.price || 0),
-        });
-      }
-      await loadSaved();
-      setSearchResults((prev) => prev.filter((x) => x.bookingRef !== f.bookingRef));
-    } catch {
-      setError("Booking failed.");
+      const bookingData = {
+        userId,
+        flightData: {
+          airline: flight.airline,
+          departureTime: flight.departureTime,
+          arrivalTime: flight.arrivalTime,
+          origin: flight.origin,
+          destination: flight.destination,
+          price: flight.price,
+          duration: flight.duration,
+          stops: flight.stops,
+          deepLink: flight.deepLink
+        },
+        passengers: searchForm.adults,
+        totalPrice: flight.price * searchForm.adults
+      };
+      await axios.post('/api/flights/book', bookingData);
+      alert('Flight booked successfully!');
+      fetchBookings();
+    } catch (err) {
+      alert('Booking failed.');
     }
   };
 
-  const deleteSaved = async (id) => {
-    if (!window.confirm("Delete this booking?")) return;
-    setError("");
+  const deleteBooking = async (id) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
     try {
-      if (flightService.cancel) {
-        await flightService.cancel(id);
-      } else {
-        await flightService.delete(id);
-      }
-      await loadSaved();
-    } catch {
-      setError("Delete failed.");
+      await axios.delete(`/api/flights/bookings/${id}`);
+      fetchBookings();
+    } catch (err) {
+      alert('Failed to delete booking.');
     }
   };
 
-  const submitManual = async (e) => {
+  const handleManualSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     try {
-      await flightService.create({
-        ...manual,
-        userId: DEMO_USER_ID,
-        price: Number(manual.price || 0),
-      });
+      const bookingData = {
+        userId,
+        flightData: {
+          airline: manualForm.airline,
+          departureTime: manualForm.date,
+          arrivalTime: manualForm.date,
+          origin: manualForm.from,
+          destination: manualForm.to,
+          price: Number(manualForm.price),
+          flightNumber: manualForm.bookingRef
+        },
+        passengers: 1,
+        totalPrice: Number(manualForm.price)
+      };
+      await axios.post('/api/flights/book', bookingData);
       setShowManual(false);
-      setManual({ from: "", to: "", date: "", price: "", airline: "", bookingRef: "" });
-      await loadSaved();
-    } catch {
-      setError("Failed to save flight.");
+      setManualForm({ from: '', to: '', date: '', airline: '', price: '', bookingRef: '' });
+      fetchBookings();
+    } catch (err) {
+      alert('Manual save failed.');
     }
   };
 
   return (
-    <div className="space-y-6 tm-page">
-      {/* SEARCH */}
-      <div className="tm-card">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
-              Flights
-            </p>
-            <h1 className="mt-1 text-xl font-semibold text-slate-100">Search & Book</h1>
-            <p className="mt-1 text-xs text-slate-300">
-              Demo search (or API search if available). Book to save to dashboard.
-            </p>
-          </div>
+    <div className="max-w-6xl mx-auto px-6 py-12 space-y-12">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Global Flight Search</h1>
+          <p className="text-slate-500 mt-2 text-lg">Compare and book flights across thousands of destinations.</p>
+        </div>
+        <button
+          onClick={() => setShowManual(!showManual)}
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
+        >
+          {showManual ? <Trash2 size={18} /> : <Plus size={18} />}
+          {showManual ? 'Cancel' : 'Add Missing Flight'}
+        </button>
+      </div>
 
-          <button
-            onClick={() => setShowManual((s) => !s)}
-            className="tm-btn-secondary"
-          >
-            {showManual ? "Close Manual" : "Manual Add"}
-          </button>
+      {/* Search Section */}
+      {!showManual && (
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50">
+          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">From</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="Origin (e.g. DAC)"
+                  value={searchForm.from}
+                  onChange={e => setSearchForm({ ...searchForm, from: e.target.value.toUpperCase() })}
+                  maxLength={3}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">To</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="Destination (e.g. DXB)"
+                  value={searchForm.to}
+                  onChange={e => setSearchForm({ ...searchForm, to: e.target.value.toUpperCase() })}
+                  maxLength={3}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">Date</label>
+              <div className="relative">
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="date"
+                  className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                  value={searchForm.date}
+                  onChange={e => setSearchForm({ ...searchForm, date: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">Class</label>
+              <select
+                className="w-full bg-slate-50 border-none rounded-2xl py-4 px-4 text-slate-900 font-bold focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+                value={searchForm.cabinClass}
+                onChange={e => setSearchForm({ ...searchForm, cabinClass: e.target.value })}
+              >
+                <option>Economy</option>
+                <option>Business</option>
+                <option>First</option>
+              </select>
+            </div>
+            <button
+              disabled={searching}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl py-4 px-6 font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200 disabled:opacity-50"
+            >
+              {searching ? <Loader2 className="animate-spin" /> : <Search size={20} />}
+              {searching ? 'Searching...' : 'Find Flights'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Manual Form Section */}
+      {showManual && (
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl animate-in fade-in slide-in-from-top-4 duration-500">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Enter Details Manually</h2>
+          <form onSubmit={handleManualSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <input className="tm-input-minimal" placeholder="From (e.g. JFK)" value={manualForm.from} onChange={e => setManualForm({ ...manualForm, from: e.target.value })} />
+            <input className="tm-input-minimal" placeholder="To (e.g. LHR)" value={manualForm.to} onChange={e => setManualForm({ ...manualForm, to: e.target.value })} />
+            <input type="date" className="tm-input-minimal" value={manualForm.date} onChange={e => setManualForm({ ...manualForm, date: e.target.value })} />
+            <input className="tm-input-minimal" placeholder="Airline Name" value={manualForm.airline} onChange={e => setManualForm({ ...manualForm, airline: e.target.value })} />
+            <input type="number" className="tm-input-minimal" placeholder="Amount (USD)" value={manualForm.price} onChange={e => setManualForm({ ...manualForm, price: e.target.value })} />
+            <input className="tm-input-minimal" placeholder="Ref / Flight #" value={manualForm.bookingRef} onChange={e => setManualForm({ ...manualForm, bookingRef: e.target.value })} />
+            <button type="submit" className="md:col-span-3 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all">Save to My Dashboard</button>
+          </form>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Results Column */}
+        <div className="lg:col-span-2 space-y-6">
+          <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            {searchResults.length > 0 ? 'Best Options' : 'Available Offers'}
+            <span className="text-sm font-normal text-slate-400 ml-2 bg-slate-100 px-3 py-1 rounded-full">{searchResults.length} found</span>
+          </h3>
+
+          {error && (
+            <div className="p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 flex items-start gap-3">
+              <Info size={20} className="shrink-0 mt-0.5" />
+              <p>{error}</p>
+            </div>
+          )}
+
+          {!searching && searchResults.length === 0 && !error && (
+            <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-100 rounded-3xl">
+              <Plane size={48} className="mb-4 opacity-20" />
+              <p>Enter your search criteria above to see results.</p>
+            </div>
+          )}
+
+          <div className="grid gap-6">
+            {searchResults.map((flight, idx) => (
+              <div key={idx} className="group bg-white p-6 rounded-3xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/5 transition-all">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex-grow flex items-center justify-between gap-8 py-2">
+                    <div className="text-center md:text-left">
+                      <p className="text-3xl font-black text-slate-900">{flight.origin}</p>
+                      <p className="text-xs font-bold text-slate-400 mt-1">{new Date(flight.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <div className="flex-grow flex flex-col items-center">
+                      <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">{flight.duration}</p>
+                      <div className="w-full flex items-center gap-2">
+                        <div className="h-[2px] flex-grow bg-slate-100"></div>
+                        <Plane className="text-blue-500 group-hover:translate-x-4 transition-transform duration-700" size={16} />
+                        <div className="h-[2px] flex-grow bg-slate-100"></div>
+                      </div>
+                      <p className="text-[10px] font-bold text-blue-500 mt-2">{flight.stops === 0 ? 'DIRECT' : `${flight.stops} STOP`}</p>
+                    </div>
+                    <div className="text-center md:text-right">
+                      <p className="text-3xl font-black text-slate-900">{flight.destination}</p>
+                      <p className="text-xs font-bold text-slate-400 mt-1">{new Date(flight.arrivalTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </div>
+                  <div className="md:w-px md:h-20 bg-slate-100"></div>
+                  <div className="flex flex-row md:flex-col justify-between items-center md:items-end gap-2 md:w-32">
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-slate-400 uppercase leading-none mb-1">{flight.airline}</p>
+                      <p className="text-2xl font-black text-slate-900">${flight.price}</p>
+                    </div>
+                    <button onClick={() => bookFlight(flight)} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all text-sm">Book</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="mt-5 grid gap-3 md:grid-cols-5 items-end">
-          <div>
-            <label className="text-xs text-slate-300">From</label>
-            <input className="tm-input mt-2" value={from} onChange={(e) => setFrom(e.target.value)} placeholder="DAC" />
-          </div>
+        {/* History Column */}
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold text-slate-900">Your Bookings</h3>
 
-          <div>
-            <label className="text-xs text-slate-300">To</label>
-            <input className="tm-input mt-2" value={to} onChange={(e) => setTo(e.target.value)} placeholder="DXB" />
-          </div>
-
-          <div>
-            <label className="text-xs text-slate-300">Date</label>
-            <input className="tm-input mt-2" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-
-          <button
-            onClick={handleSearch}
-            disabled={!canSearch || searching}
-            className="tm-btn-primary md:col-span-2"
-          >
-            {searching ? "Searching..." : "Search Flights"}
-          </button>
-        </div>
-
-        {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
-
-        {/* Results */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-100">Results</p>
-            <span className="tm-badge">{searchResults.length} options</span>
-          </div>
-
-          {searchResults.length === 0 ? (
-            <div className="mt-3 tm-panel text-sm text-slate-300">
-              Search a route to show flight options.
+          {loadingBookings ? (
+            <div className="flex justify-center p-12"><Loader2 className="animate-spin text-slate-300" /></div>
+          ) : bookings.length === 0 ? (
+            <div className="p-8 bg-slate-50 rounded-3xl text-center border border-dashed border-slate-200">
+              <p className="text-slate-400 text-sm">No bookings recorded yet.</p>
             </div>
           ) : (
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              {searchResults.map((f, idx) => (
-                <div key={f.bookingRef || idx} className="tm-panel">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-base font-semibold text-slate-100">
-                        {f.from} → {f.to}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-300">
-                        {f.airline || "Airline"} • {f.date}
-                      </p>
-                      <p className="mt-2 text-xl font-semibold text-emerald-300">
-                        ${Number(f.price || 0).toFixed(0)}
-                      </p>
-                      {f.bookingRef && (
-                        <p className="mt-1 text-xs text-slate-500">Ref: {f.bookingRef}</p>
-                      )}
-                    </div>
-
-                    <button onClick={() => bookFlight(f)} className="tm-btn-primary">
-                      Book
+            <div className="space-y-4">
+              {bookings.map((booking) => (
+                <div key={booking._id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative group overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
+                  <div className="flex justify-between items-start mb-3">
+                    <p className="text-xs font-bold text-emerald-600 uppercase bg-emerald-50 px-2 py-0.5 rounded italic">Booked</p>
+                    <button onClick={() => deleteBooking(booking._id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                      <Trash2 size={16} />
                     </button>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-900 font-bold">
+                    <span>{booking.flightData.origin}</span>
+                    <ArrowRight size={14} className="text-slate-400" />
+                    <span>{booking.flightData.destination}</span>
+                  </div>
+                  <div className="mt-3 flex justify-between items-end">
+                    <div className="text-xs text-slate-500">
+                      <p>{booking.flightData.airline}</p>
+                      <p className="mt-1">{new Date(booking.flightData.departureTime || booking.bookingDate).toLocaleDateString()}</p>
+                    </div>
+                    <p className="text-lg font-black text-slate-900">${booking.totalPrice}</p>
                   </div>
                 </div>
               ))}
             </div>
           )}
-
-          {/* Manual Add */}
-          {showManual && (
-            <div className="mt-6 tm-panel">
-              <p className="text-sm font-semibold text-slate-100">Manual Booking</p>
-              <form onSubmit={submitManual} className="mt-4 grid gap-3 md:grid-cols-3">
-                <input required className="tm-input" placeholder="From" value={manual.from}
-                  onChange={(e) => setManual({ ...manual, from: e.target.value })} />
-                <input required className="tm-input" placeholder="To" value={manual.to}
-                  onChange={(e) => setManual({ ...manual, to: e.target.value })} />
-                <input required type="date" className="tm-input" value={manual.date}
-                  onChange={(e) => setManual({ ...manual, date: e.target.value })} />
-                <input className="tm-input" placeholder="Airline" value={manual.airline}
-                  onChange={(e) => setManual({ ...manual, airline: e.target.value })} />
-                <input required type="number" className="tm-input" placeholder="Price" value={manual.price}
-                  onChange={(e) => setManual({ ...manual, price: e.target.value })} />
-                <input className="tm-input" placeholder="Booking Ref" value={manual.bookingRef}
-                  onChange={(e) => setManual({ ...manual, bookingRef: e.target.value })} />
-                <button type="submit" className="tm-btn-primary md:col-span-3">
-                  Save Booking
-                </button>
-              </form>
-            </div>
-          )}
         </div>
-      </div>
-
-      {/* SAVED BOOKINGS */}
-      <div className="tm-card">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-100">Booked Flights</h2>
-          <button onClick={loadSaved} className="tm-btn-secondary">
-            Refresh
-          </button>
-        </div>
-
-        {loadingSaved ? (
-          <p className="mt-4 text-sm text-slate-400">Loading...</p>
-        ) : saved.length === 0 ? (
-          <div className="mt-4 tm-panel text-sm text-slate-300">No bookings yet.</div>
-        ) : (
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {saved.map((f) => (
-              <div key={f._id} className="tm-panel">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-base font-semibold text-slate-100">
-                      {f.from} → {f.to}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-300">
-                      {f.airline || "Airline"} • {f.date}
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-emerald-300">
-                      ${Number(f.price || 0).toFixed(0)}
-                    </p>
-                    {f.bookingRef && <p className="mt-1 text-xs text-slate-500">Ref: {f.bookingRef}</p>}
-                  </div>
-
-                  <button onClick={() => deleteSaved(f._id)} className="tm-btn-danger">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
-}
+};
+
+export default Flights;

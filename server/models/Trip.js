@@ -1,40 +1,45 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
-const tripSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: false,
-    },
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    destination: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    startDate: {
-      type: Date,
-      required: true,
-    },
-    endDate: {
-      type: Date,
-      required: true,
-    },
-    type: {
-      type: String,
-      default: "Leisure",
-      trim: true,
-    },
+const tripSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  { timestamps: true } // gives createdAt/updatedAt (needed for sort)
-);
+  name: {
+    type: String,
+    required: true
+  },
+  destination: {
+    type: String,
+    required: true
+  },
+  startDate: {
+    type: Date,
+    required: true
+  },
+  endDate: {
+    type: Date,
+    required: true
+  },
+  budget: {
+    type: Number,
+    default: 0
+  },
+  tripType: {
+    type: String,
+    enum: ['solo', 'couple', 'family', 'friends', 'business', 'other'],
+    default: 'solo'
+  },
+  notes: {
+    type: String
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
 
-// Prevent model overwrite error in dev hot-reload
-const Trip = mongoose.models.Trip || mongoose.model("Trip", tripSchema);
-
-export default Trip;
+module.exports = mongoose.model('Trip', tripSchema);

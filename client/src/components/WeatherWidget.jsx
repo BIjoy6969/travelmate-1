@@ -1,40 +1,10 @@
-<<<<<<< HEAD
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import axios from "axios";
 
-const WeatherWidget = () => {
-  const [city, setCity] = useState("");
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleFetchWeather = async () => {
-    if (!city.trim()) {
-      setError("Please enter a city or destination name.");
-      return;
-    }
-
-    setError("");
-    setLoading(true);
-    setWeather(null);
-
-    try {
-      // Base URL comes from Vite env (.env file in client/)
-      const baseURL =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:1340";
-
-      const res = await axios.get(`${baseURL}/api/weather`, {
-        params: { city },
-      });
-
-      setWeather(res.data);
-    } catch (err) {
-      console.error(err);
-      setError("Could not fetch weather. Please try again.");
-=======
-import { useMemo, useState } from "react";
-import { weatherService } from "../services/api";
-
+/**
+ * WeatherWidget - Displays current weather for a city
+ * Uses Member 4's premium UI with Member 3's API integration logic
+ */
 function toTitleCase(str = "") {
   return str
     .toLowerCase()
@@ -63,8 +33,23 @@ export default function WeatherWidget({
     setLoading(true);
     setError("");
     try {
-      const res = await weatherService.getWeather(query);
-      setData(res.data);
+      // Base URL fallback
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "";
+      const res = await axios.get(`${baseURL}/api/weather`, { params: { city: query } });
+
+      // Adapt the data format if necessary
+      const weatherData = res.data;
+      setData({
+        city: weatherData.city,
+        country: weatherData.country,
+        temperature: weatherData.temp,
+        feelsLike: weatherData.feels_like,
+        humidity: weatherData.humidity,
+        description: weatherData.description,
+        icon: weatherData.icon,
+        updatedAt: new Date().toISOString()
+      });
+
       onCityChange?.(query);
     } catch (e) {
       setData(null);
@@ -72,78 +57,29 @@ export default function WeatherWidget({
         e?.response?.data?.error ||
         "Could not load weather. Please try another city."
       );
->>>>>>> origin/member4-bijoy
     } finally {
       setLoading(false);
     }
   };
 
-<<<<<<< HEAD
-  return (
-    <div className="max-w-md mx-auto bg-white shadow-lg rounded-xl p-6 mt-6">
-      <h2 className="text-2xl font-semibold mb-4 text-center">
-        🌤 Real-time Weather
-      </h2>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          placeholder="Enter destination (e.g., Dhaka, Paris)"
-          className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-        />
-        <button
-          onClick={handleFetchWeather}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          Check
-        </button>
-      </div>
-
-      {loading && <p className="text-center">Loading weather...</p>}
-
-      {error && (
-        <p className="text-red-500 text-sm text-center mb-2">{error}</p>
-      )}
-
-      {weather && (
-        <div className="mt-2 text-center">
-          <p className="text-lg font-semibold">
-            {weather.city}, {weather.country}
-          </p>
-          <p className="text-4xl font-bold my-2">
-            {Math.round(weather.temp)}°C
-          </p>
-          <p className="capitalize text-gray-700">{weather.description}</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Feels like {Math.round(weather.feels_like)}°C • Humidity{" "}
-            {weather.humidity}%
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default WeatherWidget;
-=======
   const temp = data?.temperature;
   const feels = data?.feelsLike;
 
   return (
-    <div className={compact ? "" : "w-full"}>
+    <div className={compact ? "" : "w-full max-w-md mx-auto"}>
       <div className={`rounded-2xl border border-slate-200 bg-white/90 shadow-sm ${compact ? "p-4" : "p-6"}`}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-slate-800">🌤️ Weather</p>
-            <p className="text-xs text-slate-500">
-              Current Weather
-            </p>
+            {!compact && (
+              <p className="text-xs text-slate-500">
+                Current Weather
+              </p>
+            )}
           </div>
-          {data?.updatedAt && (
+          {data?.updatedAt && !compact && (
             <p className="text-[11px] text-slate-400">
-              Updated: {new Date(data.updatedAt).toLocaleString()}
+              Updated: {new Date(data.updatedAt).toLocaleTimeString()}
             </p>
           )}
         </div>
@@ -160,10 +96,10 @@ export default WeatherWidget;
           />
           <button
             onClick={() => fetchWeather()}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 active:scale-[0.99]"
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? "Loading…" : "Check"}
+            {loading ? "..." : "Check"}
           </button>
         </div>
 
@@ -175,7 +111,7 @@ export default WeatherWidget;
 
         {data && (
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="col-span-2 rounded-2xl bg-slate-50 p-4">
+            <div className="col-span-2 rounded-2xl bg-slate-50 p-4 text-center">
               <p className="text-sm font-semibold text-slate-900">
                 {toTitleCase(data.city)}, {data.country}
               </p>
@@ -184,45 +120,40 @@ export default WeatherWidget;
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Temperature</p>
+            <div className="rounded-2xl bg-slate-50 p-4 text-center">
+              <p className="text-xs text-slate-500">Temp</p>
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {typeof temp === "number" ? `${Math.round(temp)}°C` : "—"}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Feels like</p>
+            <div className="rounded-2xl bg-slate-50 p-4 text-center">
+              <p className="text-xs text-slate-500">Feels Like</p>
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {typeof feels === "number" ? `${Math.round(feels)}°C` : "—"}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Humidity</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">
-                {data.humidity != null ? `${data.humidity}%` : "—"}
-              </p>
-            </div>
+            {!compact && (
+              <>
+                <div className="rounded-2xl bg-slate-50 p-4 text-center">
+                  <p className="text-xs text-slate-500">Humidity</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    {data.humidity != null ? `${data.humidity}%` : "—"}
+                  </p>
+                </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs text-slate-500">Wind</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">
-                {data.windSpeed != null ? `${data.windSpeed} m/s` : "—"}
-              </p>
-            </div>
+                <div className="rounded-2xl bg-slate-50 p-4 text-center">
+                  <p className="text-xs text-slate-500">Wind</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">
+                    {data.windSpeed != null ? `${data.windSpeed} m/s` : "—"}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
-        )}
-
-        {!data && !error && (
-          <p className="mt-4 text-sm text-slate-500">
-            Tip: try <span className="font-semibold text-slate-700">Dhaka</span>,{" "}
-            <span className="font-semibold text-slate-700">Sylhet</span>,{" "}
-            <span className="font-semibold text-slate-700">Chittagong</span>.
-          </p>
         )}
       </div>
     </div>
   );
 }
->>>>>>> origin/member4-bijoy

@@ -2,17 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-// Attempt to use either config/db.js or config/database.js if one exists
-let connectDB;
-try {
-    connectDB = require('./config/db');
-} catch (e) {
-    try {
-        connectDB = require('./config/database').connectDB;
-    } catch (e2) {
-        console.error("Could not find db connection file");
-    }
-}
+const connectDB = require('./config/db');
 
 dotenv.config();
 
@@ -23,7 +13,10 @@ app.use(cors());
 app.use(express.json());
 
 // Connect Database
-if (connectDB) connectDB();
+connectDB();
+
+// API Routes
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // API Routes from Fariha's branch (Member 2)
 app.use('/api', require('./routes/api'));

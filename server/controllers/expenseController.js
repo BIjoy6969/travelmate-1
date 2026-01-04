@@ -1,6 +1,6 @@
-import Expense from "../models/Expense.js";
+const Expense = require("../models/Expense");
 
-export const getExpenses = async (req, res) => {
+exports.getExpenses = async (req, res) => {
   try {
     const { userId, tripId } = req.query;
     const query = { userId };
@@ -14,7 +14,7 @@ export const getExpenses = async (req, res) => {
   }
 };
 
-export const getExpenseById = async (req, res) => {
+exports.getExpenseById = async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.query;
@@ -31,20 +31,20 @@ export const getExpenseById = async (req, res) => {
   }
 };
 
-export const createExpense = async (req, res) => {
+exports.createExpense = async (req, res) => {
   try {
-    const { userId, tripId, category, amount, description } = req.body;
+    const { userId, tripId, category, amount, description, title } = req.body;
 
-    if (!userId || !tripId || !category || !amount) {
+    if (!userId || !tripId || !amount) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const expense = new Expense({
       userId,
       tripId,
-      category,
+      title: title || description || "Untitled Expense",
+      category: category || "Other",
       amount: Number(amount),
-      description: description || "",
     });
 
     await expense.save();
@@ -55,7 +55,7 @@ export const createExpense = async (req, res) => {
   }
 };
 
-export const updateExpense = async (req, res) => {
+exports.updateExpense = async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.query;
@@ -78,7 +78,7 @@ export const updateExpense = async (req, res) => {
   }
 };
 
-export const deleteExpense = async (req, res) => {
+exports.deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.query;
@@ -94,4 +94,3 @@ export const deleteExpense = async (req, res) => {
     res.status(500).json({ error: "Failed to delete expense" });
   }
 };
-

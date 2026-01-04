@@ -1,13 +1,19 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const ExpenseSchema = new mongoose.Schema({
-  userId: String,
-  tripId: String,
-  category: String,
-  amount: Number,
-  description: String,
-  date: { type: Date, default: Date.now },
-});
+const expenseSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    tripId: { type: String, required: true },
+    title: { type: String, required: true },
+    amount: { type: Number, required: true },
+    category: {
+      type: String,
+      enum: ["Food", "Transport", "Lodging", "Activities", "Shopping", "Other"],
+      default: "Other",
+    },
+    date: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
 
-export default mongoose.model("Expense", ExpenseSchema);
-
+module.exports = mongoose.model("Expense", expenseSchema);

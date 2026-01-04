@@ -28,7 +28,7 @@ const ReviewSection = ({ destinationId, destinationName, onClose }) => {
     const fetchReviews = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/reviews/${destinationId}`);
+            const res = await fetch(`/api/reviews/${destinationId}`);
             if (res.ok) {
                 const data = await res.json();
                 setReviews(data);
@@ -49,7 +49,7 @@ const ReviewSection = ({ destinationId, destinationName, onClose }) => {
         formData.append('image', file);
 
         try {
-            const res = await fetch('http://localhost:5000/api/upload', {
+            const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -76,7 +76,7 @@ const ReviewSection = ({ destinationId, destinationName, onClose }) => {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch('http://localhost:5000/api/reviews', {
+            const res = await fetch('/api/reviews', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -109,7 +109,7 @@ const ReviewSection = ({ destinationId, destinationName, onClose }) => {
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this review?")) return;
         try {
-            await fetch(`http://localhost:5000/api/reviews/${id}`, { method: 'DELETE' });
+            await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
             setReviews(reviews.filter(r => r._id !== id));
         } catch (error) {
             console.error("Error deleting review:", error);

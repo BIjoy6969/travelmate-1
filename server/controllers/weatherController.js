@@ -1,6 +1,6 @@
-import axios from "axios";
+const axios = require("axios");
 
-export const getWeather = async (req, res) => {
+exports.getWeather = async (req, res) => {
   const { city } = req.query;
   if (!city) {
     return res.status(400).json({ error: "city is required" });

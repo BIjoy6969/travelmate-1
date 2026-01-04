@@ -1,19 +1,13 @@
-import mongoose from "mongoose";
-import Trip from "../models/Trip.js";
-import Expense from "../models/Expense.js";
-import FlightBooking from "../models/FlightBooking.js";
-import axios from "axios";
+const mongoose = require("mongoose");
+const Trip = require("../models/Trip");
+const Expense = require("../models/Expense");
+const FlightBooking = require("../models/FlightBooking");
+const axios = require("axios");
 
-export const getDashboard = async (req, res) => {
+exports.getDashboard = async (req, res) => {
   const { userId, city, base = "USD", target = "BDT" } = req.query;
 
   try {
-    // -----------------------------
-    // 1) Database summary (optional)
-    // -----------------------------
-    // For demo-without-login, userId may be missing.
-    // If userId is missing or invalid, we return a "public" dashboard summary:
-    // - trips/expenses/flights will be empty, but weather/currency still work.
     let trips = [];
     let expenses = [];
     let flights = [];
@@ -23,7 +17,6 @@ export const getDashboard = async (req, res) => {
     if (userId) {
       const validObjectId = mongoose.isValidObjectId(userId);
 
-      // Trips use ObjectId in schema; expenses/flights use String in this project.
       if (validObjectId) {
         trips = await Trip.find({ userId }).sort({ createdAt: -1 });
         const tripIds = trips.map((t) => t._id.toString());
@@ -37,7 +30,6 @@ export const getDashboard = async (req, res) => {
 
         totalSpent = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
       } else {
-        // If someone passes a string userId, we can still show expenses/flights (stored as String).
         expenses = await Expense.find({ userId });
         flights = await FlightBooking.find({ userId }).sort({ date: 1 });
 
@@ -50,9 +42,6 @@ export const getDashboard = async (req, res) => {
       }
     }
 
-    // -----------------------------
-    // 2) Weather (Member-4)
-    // -----------------------------
     let weather = null;
     if (city) {
       const apiKey = process.env.OPENWEATHER_API_KEY;
@@ -77,7 +66,6 @@ export const getDashboard = async (req, res) => {
             updatedAt: new Date().toISOString(),
           };
         } catch (e) {
-          // Non-fatal: dashboard still returns currency + db data.
           weather = {
             error:
               e?.response?.data?.message ||
@@ -92,20 +80,16 @@ export const getDashboard = async (req, res) => {
       }
     }
 
-    // -----------------------------
-    // 3) Currency conversion (Member-4)
-    // -----------------------------
     let currency = null;
     try {
-      const cUrl = `https://api.exchangerate.host/convert?from=${encodeURIComponent(
-        base
-      )}&to=${encodeURIComponent(target)}&amount=1`;
+      // Using exchangerate-api fallback since exchangerate.host might be shaky
+      const cUrl = `https://api.exchangerate-api.com/v4/latest/${encodeURIComponent(base)}`;
       const { data } = await axios.get(cUrl);
 
       currency = {
         base,
         target,
-        rate: data?.info?.rate ?? null,
+        rate: data?.rates?.[target] ?? null,
         updatedAt: new Date().toISOString(),
       };
     } catch (e) {

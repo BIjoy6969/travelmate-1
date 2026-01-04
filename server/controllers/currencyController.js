@@ -1,4 +1,4 @@
-import axios from "axios";
+const axios = require("axios");
 
 /**
  * Provider: open.er-api.com (no API key)
@@ -6,7 +6,7 @@ import axios from "axios";
  * https://open.er-api.com/v6/latest/USD
  * -> rates: { BDT: ..., EUR: ... }
  */
-export const convertCurrency = async (req, res) => {
+exports.convertCurrency = async (req, res) => {
   const base = String(req.query.base || "USD").toUpperCase();
   const target = String(req.query.target || "BDT").toUpperCase();
   const amount = Number(req.query.amount ?? 1);

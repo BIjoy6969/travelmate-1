@@ -1,11 +1,11 @@
-import express from "express";
-import {
+const express = require("express");
+const {
   getAllTrips,
   getTripById,
   createTrip,
   updateTrip,
   deleteTrip,
-} from "../controllers/tripController.js";
+} = require("../controllers/tripController");
 
 const router = express.Router();
 
@@ -15,5 +15,4 @@ router.post("/", createTrip);
 router.put("/:id", updateTrip);
 router.delete("/:id", deleteTrip);
 
-export default router;
-
+module.exports = router;
