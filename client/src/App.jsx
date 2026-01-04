@@ -1,10 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React from 'react';
 import FavoritesPage from './pages/FavoritesPage';
 import AIChat from './components/AIChat';
-import { Heart, Globe, MapPin, Sparkles, Plane } from 'lucide-react';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import ItineraryGenerator from './pages/ItineraryGenerator';
+import HotelSearch from './pages/HotelSearch';
+import BookingHistory from './pages/BookingHistory';
+import { Heart, Globe, MapPin, Sparkles, Plane, Hotel, Calendar } from 'lucide-react';
 import './App.css'
-
-import React from 'react';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -52,10 +56,22 @@ const Navigation = () => {
         <span className="text-xl font-bold tracking-tight text-minimal-text">TravelMate</span>
       </Link>
 
-      <div className="flex items-center gap-8">
+      <div className="hidden md:flex items-center gap-8">
         <Link to="/planner" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/planner') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Sparkles size={16} />
+          <span>Planner</span>
+        </Link>
+        <Link to="/itinerary" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/itinerary') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Calendar size={16} />
+          <span>Itinerary</span>
+        </Link>
+        <Link to="/hotels" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/hotels') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Hotel size={16} />
+          <span>Hotels</span>
+        </Link>
+        <Link to="/bookings" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/bookings') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
           <Plane size={16} />
-          <span>Trip Planner</span>
+          <span>Bookings</span>
         </Link>
       </div>
     </nav>
@@ -111,6 +127,9 @@ function App() {
             } />
             <Route path="/planner" element={<ErrorBoundary><FavoritesPage /></ErrorBoundary>} />
             <Route path="/favorites" element={<ErrorBoundary><FavoritesPage /></ErrorBoundary>} />
+            <Route path="/itinerary" element={<ErrorBoundary><ItineraryGenerator /></ErrorBoundary>} />
+            <Route path="/hotels" element={<ErrorBoundary><HotelSearch /></ErrorBoundary>} />
+            <Route path="/bookings" element={<ErrorBoundary><BookingHistory /></ErrorBoundary>} />
           </Routes>
         </main>
 
@@ -120,7 +139,7 @@ function App() {
         <AIChat />
       </div>
     </Router>
-  )
+  );
 }
 
 export default App;

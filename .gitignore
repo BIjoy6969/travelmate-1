@@ -1,8 +1,8 @@
 node_modules/
 .env
 .DS_Store
-guidelines.txt
-travelmate.txt
 dist/
 build/
 *.log
+travelmate.txt
+guidelines.txt
