@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+
 // Attempt to use either config/db.js or config/database.js if one exists
 let connectDB;
 try {
@@ -24,7 +25,7 @@ app.use(express.json());
 // Connect Database
 if (connectDB) connectDB();
 
-// API Routes from Fariha's branch
+// API Routes from Fariha's branch (Member 2)
 app.use('/api', require('./routes/api'));
 
 // API Routes from Member-3 branch
@@ -42,6 +43,29 @@ app.use('/api/chat', chatRoutes);
 
 const uploadRoutes = require('./routes/uploadRoutes');
 app.use('/api/upload', uploadRoutes);
+
+// API Routes from Bijoy's branch (Member 4)
+// Note: These will be converted to CommonJS
+const weatherRoutes = require('./routes/weatherRoutes');
+app.use('/api/weather', weatherRoutes);
+
+const currencyRoutes = require('./routes/currencyRoutes');
+app.use('/api/currency', currencyRoutes);
+
+const tripRoutes = require('./routes/tripRoutes');
+app.use('/api/trips', tripRoutes);
+
+const expenseRoutes = require('./routes/expenseRoutes');
+app.use('/api/expenses', expenseRoutes);
+
+const flightRoutes = require('./routes/flightRoutes');
+app.use('/api/flights', flightRoutes);
+
+const dashboardRoutes = require('./routes/dashboardRoutes');
+app.use('/api/dashboard', dashboardRoutes);
+
+const exportRoutes = require('./routes/exportRoutes');
+app.use('/api/export', exportRoutes);
 
 app.get('/', (req, res) => {
     res.send('TravelMate API is running...');

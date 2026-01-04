@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const express = require("express");
 const axios = require("axios");
 
@@ -44,3 +45,14 @@ router.get("/", async (req, res) => {
 });
 
 module.exports = router;
+=======
+import express from "express";
+import { getWeather } from "../controllers/weatherController.js";
+
+const router = express.Router();
+
+router.get("/", getWeather);
+
+export default router;
+
+>>>>>>> origin/member4-bijoy

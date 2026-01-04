@@ -1,13 +1,20 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import React from 'react';
 import FavoritesPage from './pages/FavoritesPage';
 import AIChat from './components/AIChat';
-import Navbar from './components/Navbar';
+// import Navbar from './components/Navbar'; // Preferred to use our responsive Navigation
 import Home from './pages/Home';
 import ItineraryGenerator from './pages/ItineraryGenerator';
 import HotelSearch from './pages/HotelSearch';
 import BookingHistory from './pages/BookingHistory';
-import { Heart, Globe, MapPin, Sparkles, Plane, Hotel, Calendar } from 'lucide-react';
+import Dashboard from "./pages/Dashboard";
+import Trips from "./pages/Trips";
+import Expenses from "./pages/Expenses";
+import Flights from "./pages/Flights";
+import Weather from "./pages/Weather";
+import Currency from "./pages/Currency";
+
+import { Heart, Globe, MapPin, Sparkles, Plane, Hotel, Calendar, LayoutDashboard, Cloud, Coins, Wallet } from 'lucide-react';
 import './App.css'
 
 class ErrorBoundary extends React.Component {
@@ -56,22 +63,38 @@ const Navigation = () => {
         <span className="text-xl font-bold tracking-tight text-minimal-text">TravelMate</span>
       </Link>
 
-      <div className="hidden md:flex items-center gap-8">
+      <div className="hidden lg:flex items-center gap-6">
+        <Link to="/dashboard" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <LayoutDashboard size={16} />
+          <span>Dashboard</span>
+        </Link>
         <Link to="/planner" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/planner') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
           <Sparkles size={16} />
           <span>Planner</span>
         </Link>
         <Link to="/itinerary" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/itinerary') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
           <Calendar size={16} />
-          <span>Itinerary</span>
+          <span>AI Itinerary</span>
+        </Link>
+        <Link to="/flights" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/flights') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Plane size={16} />
+          <span>Flights</span>
         </Link>
         <Link to="/hotels" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/hotels') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
           <Hotel size={16} />
           <span>Hotels</span>
         </Link>
-        <Link to="/bookings" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/bookings') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
-          <Plane size={16} />
-          <span>Bookings</span>
+        <Link to="/weather" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/weather') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Cloud size={16} />
+          <span>Weather</span>
+        </Link>
+        <Link to="/currency" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/currency') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Coins size={16} />
+          <span>Currency</span>
+        </Link>
+        <Link to="/expenses" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/expenses') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <Wallet size={16} />
+          <span>Expenses</span>
         </Link>
       </div>
     </nav>
@@ -102,6 +125,10 @@ function App() {
                     <Sparkles size={16} />
                     Start Planning
                   </Link>
+                  <Link to="/dashboard" className="btn-minimal-secondary shadow-sm flex items-center gap-2">
+                    <LayoutDashboard size={16} />
+                    Go to Dashboard
+                  </Link>
                 </div>
 
                 <div className="w-full max-w-5xl pt-12">
@@ -125,16 +152,23 @@ function App() {
                 </div>
               </div>
             } />
+            <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
             <Route path="/planner" element={<ErrorBoundary><FavoritesPage /></ErrorBoundary>} />
             <Route path="/favorites" element={<ErrorBoundary><FavoritesPage /></ErrorBoundary>} />
             <Route path="/itinerary" element={<ErrorBoundary><ItineraryGenerator /></ErrorBoundary>} />
             <Route path="/hotels" element={<ErrorBoundary><HotelSearch /></ErrorBoundary>} />
             <Route path="/bookings" element={<ErrorBoundary><BookingHistory /></ErrorBoundary>} />
+            <Route path="/trips" element={<ErrorBoundary><Trips /></ErrorBoundary>} />
+            <Route path="/expenses" element={<ErrorBoundary><Expenses /></ErrorBoundary>} />
+            <Route path="/flights" element={<ErrorBoundary><Flights /></ErrorBoundary>} />
+            <Route path="/weather" element={<ErrorBoundary><Weather /></ErrorBoundary>} />
+            <Route path="/currency" element={<ErrorBoundary><Currency /></ErrorBoundary>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
         <footer className="py-12 border-t border-minimal-border text-center">
-          <p className="text-xs text-minimal-muted font-medium uppercase tracking-widest">TravelMate</p>
+          <p className="text-xs text-minimal-muted font-medium uppercase tracking-widest">&copy; 2025 TravelMate</p>
         </footer>
         <AIChat />
       </div>
