@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Globe, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import api from '../services/api';
 
 const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -8,7 +9,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/api/auth/register', formData);
+            await api.post('/auth/register', formData);
             alert('Registration successful! Please sign in.');
             window.location.href = '/login';
         } catch (err) {

@@ -4,6 +4,7 @@ import React from 'react';
 // Components
 import Navigation from './components/Navigation';
 import AIChat from './components/AIChat';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import FavoritesPage from './pages/FavoritesPage';
@@ -61,21 +62,21 @@ function App() {
         <main className="flex-grow animate-in-faded">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
-            <Route path="/planner" element={<ErrorBoundary><FavoritesPage /></ErrorBoundary>} />
-            <Route path="/favorites" element={<ErrorBoundary><FavoritesPage /></ErrorBoundary>} />
-            <Route path="/itinerary" element={<ErrorBoundary><ItineraryGenerator /></ErrorBoundary>} />
-            <Route path="/hotels" element={<ErrorBoundary><HotelSearch /></ErrorBoundary>} />
-            <Route path="/bookings" element={<ErrorBoundary><BookingHistory /></ErrorBoundary>} />
-            <Route path="/trips" element={<ErrorBoundary><Trips /></ErrorBoundary>} />
-            <Route path="/expenses" element={<ErrorBoundary><Expenses /></ErrorBoundary>} />
-            <Route path="/flights" element={<ErrorBoundary><Flights /></ErrorBoundary>} />
-            <Route path="/weather" element={<ErrorBoundary><Weather /></ErrorBoundary>} />
-            <Route path="/currency" element={<ErrorBoundary><Currency /></ErrorBoundary>} />
-            <Route path="/destinations" element={<ErrorBoundary><DestinationsPage /></ErrorBoundary>} />
+            <Route path="/dashboard" element={<ErrorBoundary><ProtectedRoute><Dashboard /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/planner" element={<ErrorBoundary><ProtectedRoute><FavoritesPage /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/favorites" element={<ErrorBoundary><ProtectedRoute><FavoritesPage /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/itinerary" element={<ErrorBoundary><ProtectedRoute><ItineraryGenerator /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/hotels" element={<ErrorBoundary><ProtectedRoute><HotelSearch /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/bookings" element={<ErrorBoundary><ProtectedRoute><BookingHistory /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/trips" element={<ErrorBoundary><ProtectedRoute><Trips /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/expenses" element={<ErrorBoundary><ProtectedRoute><Expenses /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/flights" element={<ErrorBoundary><ProtectedRoute><Flights /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/weather" element={<ErrorBoundary><ProtectedRoute><Weather /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/currency" element={<ErrorBoundary><ProtectedRoute><Currency /></ProtectedRoute></ErrorBoundary>} />
+            <Route path="/destinations" element={<ErrorBoundary><ProtectedRoute><DestinationsPage /></ProtectedRoute></ErrorBoundary>} />
             <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
             <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
-            <Route path="/profile" element={<ErrorBoundary><Profile /></ErrorBoundary>} />
+            <Route path="/profile" element={<ErrorBoundary><ProtectedRoute><Profile /></ProtectedRoute></ErrorBoundary>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

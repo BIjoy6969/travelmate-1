@@ -1,10 +1,18 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Globe, LayoutDashboard, Sparkles, Calendar, Plane, Hotel, Cloud, Coins, Wallet, Bookmark, User } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Globe, LayoutDashboard, Sparkles, Calendar, Plane, Hotel, Cloud, Coins, Wallet, Bookmark, User, LogOut } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isActive = (path) => location.pathname === path;
+
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <nav className="sticky top-0 z-[1000] w-full bg-white border-b border-minimal-border py-4 px-6 md:px-12 flex items-center justify-between">
@@ -59,7 +67,18 @@ const Navigation = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <Link to="/login" className="text-sm font-medium text-minimal-muted hover:text-minimal-text">Sign In</Link>
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="text-sm font-medium text-minimal-muted hover:text-red-600 flex items-center gap-1 transition-colors"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        ) : (
+          <Link to="/login" className="text-sm font-medium text-minimal-muted hover:text-minimal-text">Sign In</Link>
+        )}
+
         <Link to="/profile" className="w-10 h-10 bg-minimal-surface border border-minimal-border rounded-full flex items-center justify-center text-minimal-muted hover:text-brand-800 transition-colors">
           <User size={20} />
         </Link>

@@ -8,6 +8,9 @@ exports.getDashboard = async (req, res) => {
   const { userId, city, base = "USD", target = "BDT" } = req.query;
 
   try {
+    console.log("Dashboard API called with query:", req.query);
+    console.log("Using parameters -> userId:", userId, "city:", city, "base:", base, "target:", target);
+
     let trips = [];
     let expenses = [];
     let flights = [];
@@ -21,7 +24,8 @@ exports.getDashboard = async (req, res) => {
         trips = await Trip.find({ userId }).sort({ createdAt: -1 });
         const tripIds = trips.map((t) => t._id.toString());
         expenses = await Expense.find({ userId, tripId: { $in: tripIds } });
-        flights = await FlightBooking.find({ userId }).sort({ date: 1 });
+        // FIXED: Schema uses 'user' and 'bookingDate'
+        flights = await FlightBooking.find({ user: userId }).sort({ bookingDate: 1 });
 
         spendingByTrip = {};
         expenses.forEach((e) => {
@@ -31,7 +35,8 @@ exports.getDashboard = async (req, res) => {
         totalSpent = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
       } else {
         expenses = await Expense.find({ userId });
-        flights = await FlightBooking.find({ userId }).sort({ date: 1 });
+        // FIXED: Schema uses 'user' and 'bookingDate'
+        flights = await FlightBooking.find({ user: userId }).sort({ bookingDate: 1 });
 
         spendingByTrip = {};
         expenses.forEach((e) => {
@@ -111,7 +116,7 @@ exports.getDashboard = async (req, res) => {
       currency,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to load dashboard" });
+    console.error("Dashboard Controller Error:", err);
+    res.status(500).json({ error: "Failed to load dashboard", details: err.message });
   }
 };
