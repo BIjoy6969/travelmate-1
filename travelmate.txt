@@ -1,0 +1,344 @@
+Tech Stack:
+Language: Javascript   
+Frontend: React.js
+Backend: Node.js, Express.js
+Database: MongoDB
+Styling: TailwindCSS
+Deployment: Vercel (Frontend) & Render/Heroku (Backend)
+External APIs: Google Maps API, OpenWeather API, Flight API, Currency Conversion API
+
+
+
+Functional requirements:
+Module 1 – User & Destination Management
+[Member-1] Users can register and log in securely to their account using JWT authentication.
+
+
+Users can view their dashboard after logging in and see saved destinations.
+
+
+(Uses Google Maps API for location autocomplete.)
+
+
+[Member-2] Users can browse top destinations with images, ratings, and descriptions fetched from an external travel data API.
+
+
+No login required to view this section.
+
+
+(Uses Travel/TripAdvisor API.)
+
+
+[Member-3] Search & Favorites (OpenStreetMap (OSM), Leaflet.js, Nominatim)
+Global Search: Users can search for any city, country, or landmark in the world using a search bar.
+Map Visualization: When a user selects a destination, the system displays its exact location on an interactive map (using OpenStreetMap).
+Save to Favorites: Users can save destinations to a personal "Favorites" list for quick access later.
+Manage Favorites: Users can view their saved list and remove destinations they are no longer interested in.
+
+
+[Member-4] Users can view real-time weather details of any destination.
+
+
+(Uses OpenWeather API.)
+
+
+
+Module 2 – Trip & Budget Planning
+[Member-1] Users can create a trip plan by selecting destinations, travel dates, and trip type (solo, family, etc.).
+
+
+Saved trips can be edited or deleted later.
+
+
+[Member-2] Users can generate a day-by-day itinerary using an AI-based recommendation system.
+
+
+(Uses a Travel Suggestion API or Gemini API for AI suggestions.)
+
+
+[Member-3] AI Budget Estimator
+Trip Setup: Users can select a destination (module 1, member 3), enter travel dates, and choose a travel style (e.g., Budget, Standard, Luxury).
+AI Cost Calculation: The system uses the Gemini AI API to calculate the estimated total cost of the trip. So, basically, the gemini api is used to do 2 things. (1) Generate a list of popular things to do (based on their travel style). (2) Generate the cost for them.
+Cost Breakdown: The system displays a categorized breakdown of estimated expenses (e.g., Food, Hotel, Transport).
+Manual Adjustment: Users can view the AI's estimates and manually add or edit costs if they want to customize the budget.
+
+
+[Member-4] Users can check live currency conversion rates for their chosen destination.
+
+
+(Uses Currency Exchange API.)
+
+
+
+Module 3 – Flight, Hotel & Support Services
+[Member-1] Users can search and compare available flights between two locations by date and price.
+
+
+(Uses Flight API.)
+
+
+[Member-1] Users can book a preferred flight and store booking info in their dashboard.
+
+
+[Member-2] Users can view and book hotels with details like location, price, and amenities.
+
+
+(Uses Hotel Booking API.)
+
+
+[Member-2] Users can view hotel booking history and cancel existing bookings.
+
+
+[Member-3] Users can chat with an AI-based virtual assistant for travel tips or support queries. Integrate this guy elegantly with the rest of the website.
+
+
+(Uses Gemini API. This has already been set up).
+
+
+[Member-3] Users can rate and review destinations to share their experiences. 
+
+
+[Member-4] A personalized dashboard displays trip summaries, weather info, flight data, and total spending insights.
+
+
+[Member-4] Users can export trip details and budgets as a downloadable PDF report.
+
+
+
+
+🚀 1. Deployment Overview
+You’ll deploy the MERN stack project in 3 connected layers:
+Layer
+Tech
+Deployment Platform
+Notes
+Frontend (React)
+React + Tailwind
+Vercel or Netlify
+Easiest for hosting React apps
+Backend (Express + Node)
+Node.js + Express
+Render, Railway, or Vercel Serverless Functions
+Deploy as API endpoints
+Database (MongoDB)
+MongoDB Atlas
+Free Cloud Cluster
+Cloud-hosted database
+External APIs
+Google Maps, Weather, Flight, Currency, etc.
+Integrated in backend/frontend
+Add API keys in .env file
+
+🔧 Steps to Deploy
+Step 1: Set up MongoDB Atlas
+Create an account on https://www.mongodb.com/atlas
+
+
+Create a new project → cluster
+
+
+Add a database user and get your connection URI
+ Example:
+
+ mongodb+srv://<username>:<password>@cluster0.mongodb.net/travelmate
+
+
+Step 2: Prepare the Backend (Express)
+Add all environment variables (.env):
+
+ MONGO_URI=<Your MongoDB URI>
+WEATHER_API_KEY=<Your API Key>
+GOOGLE_MAPS_API_KEY=<Your API Key>
+FLIGHT_API_KEY=<Your API Key>
+CURRENCY_API_KEY=<Your API Key>
+
+
+Test locally:
+
+ npm run server
+
+
+Deploy backend to Render or Railway:
+
+
+Push backend code to GitHub
+
+
+Connect repo to Render → select Node.js environment
+
+
+Deploy → get public API URL, e.g.,
+
+ https://travelmate-api.onrender.com
+
+
+Step 3: Prepare the Frontend (React)
+Set your backend base URL in React:
+
+ const BASE_URL = "https://travelmate-api.onrender.com";
+
+
+Build:
+
+ npm run build
+
+
+Deploy to Vercel or Netlify (link to your GitHub repo).
+
+
+Step 4: Connect Everything
+Frontend → Backend (via REST API)
+
+
+Backend → MongoDB Atlas
+
+
+Backend/Frontend → External APIs
+
+
+
+🌐 2. Website Workflow
+Here’s the logical flow of the full project, showing how all 3 modules and 4 members’ features connect but stay independent.
+
+🏠 Homepage
+Shows welcome banners, top travel destinations, and a search bar (powered by Google Maps API).
+
+
+Buttons:
+
+
+“Explore Destinations”
+
+
+“Create Trip Plan”
+
+
+“Book Flights & Hotels”
+
+
+“Login / Register”
+
+
+
+🧍‍♂️ Module 1 – User & Destination Management
+Goal: Manage user identity and explore destinations
+ Pages/Flows:
+Register/Login Page → Authenticates using JWT.
+
+
+Explore Destinations → Fetches from external Travel API.
+
+
+Destination Details → Shows map + weather data (via OpenWeather API).
+
+
+Favorites Page → User adds/removes destinations.
+
+
+➡️ Outcome: Each user can explore, favorite, and view weather — all APIs integrated here.
+
+🧳 Module 2 – Trip & Budget Planning
+Goal: Help users plan personalized trips and budgets
+ Pages/Flows:
+Create Trip Page: Select destination + dates + travel type
+
+
+Saved to MongoDB.
+
+
+AI Itinerary Page: Suggests daily plan (via Gemini/AI API).
+
+
+Budget Tracker: Add expenses → Auto total and remaining budget.
+
+
+Currency Conversion Widget: Converts rates live (Currency API).
+
+
+➡️ Outcome: Full trip plan + budget visualization saved per user.
+
+✈️ Module 3 – Flight, Hotel & Support
+Goal: Provide travel booking & post-planning features
+ Pages/Flows:
+Flight Search: User inputs “From”, “To”, “Date” → Flight API returns results.
+
+
+Flight Booking Page: Book + Save ticket info.
+
+
+Hotel Booking Page: Browse and reserve rooms (Hotel API).
+
+
+AI Assistant Chat: Get travel advice via chatbot.
+
+
+Dashboard Page: Summarizes all trips, budgets, weather, and bookings.
+
+
+Export PDF Button: Download trip report.
+
+
+➡️ Outcome: All independent features merge into one dashboard view — showing complete system functionality.
+
+🧩 3. How to Show All Functional Requirements Together (For Demo)
+When you present or test the project:
+Step
+Action
+Demonstrates
+1
+Go to homepage → browse destinations → see weather
+Module 1 (Member 1–4)
+2
+Log in → create new trip → add budget → convert currency
+Module 2 (Member 1–4)
+3
+Search for flight → book → open dashboard → view summary
+Module 3 (Member 1–4)
+4
+Click “Export PDF” → generate downloadable report
+Module 3 (FR 8)
+5
+Optional: Open console/logs to show external API data fetched
+Integration proof
+
+
+🗂️ 4. Folder Structure (Recommended)
+travelmate/
+│
+├── client/                # React frontend
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── context/
+│   │   └── utils/
+│   └── package.json
+│
+├── server/                # Express backend
+│   ├── routes/
+│   ├── controllers/
+│   ├── models/
+│   ├── config/
+│   ├── server.js
+│   └── package.json
+│
+├── .env
+└── README.md
+
+
+🎯 5. Final Tips for Deployment
+Use CORS properly to allow frontend–backend communication.
+
+
+Use dotenv for all secret API keys.
+
+
+Test APIs using Postman before connecting the frontend.
+
+
+In Vercel/Render → Add .env variables in dashboard settings.
+
+
+Ensure both backend and frontend are online simultaneously.
+
+
+

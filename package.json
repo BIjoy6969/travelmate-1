@@ -1,0 +1,18 @@
+{
+  "name": "travelmate",
+  "version": "1.0.0",
+  "description": "Integrated TravelMate Application",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "start": "npm run start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "cloudinary": "^1.41.3",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

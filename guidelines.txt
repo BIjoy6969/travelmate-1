@@ -1,0 +1,15 @@
+Project Guideline
+
+All web/desktop/android frameworks are allowed except CMS (WordPress, Drupal, Joomla, Wix, Squarespace, and Shopify), core PHP and Firebase, Django.
+
+UI/UX Requirement: You have to follow Basic front-end layout standards.
+
+It must be Responsive and mobile-friendly.
+
+Allowed: Bootstrap, Tailwind CSS, Material UI, DaisyUI, Chakra UI, Ant Design, or any CSS library/framework that is not a full CMS or page builder.
+
+Not Allowed: Drag-and-drop builders like Elementor, Wix-style editors, or AI-generated full page templates without understanding the code structure.
+
+Database Requirement: Must use SQL / NoSQL / Local Storage
+
+Hardcode data is not accepted. CRUD operations must be real.
