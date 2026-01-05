@@ -37,7 +37,7 @@ exports.getTripById = async (req, res) => {
 
 exports.createTrip = async (req, res) => {
   try {
-    const { userId, title, destination, startDate, endDate, type } = req.body;
+    const { userId, title, destination, startDate, endDate, type, budget, notes } = req.body;
 
     if (!userId || !title || !destination || !startDate || !endDate) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -49,7 +49,9 @@ exports.createTrip = async (req, res) => {
       destination,
       startDate,
       endDate,
-      type: type || "Leisure",
+      tripType: type || "Leisure",
+      budget: budget || 0,
+      notes: notes || ""
     });
 
     await trip.save();

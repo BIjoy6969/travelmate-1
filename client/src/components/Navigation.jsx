@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Globe, LayoutDashboard, Sparkles, Calendar, Plane, Hotel, Cloud, Coins, Wallet, Bookmark, User, LogOut } from 'lucide-react';
+import { Globe, LayoutDashboard, Sparkles, Calendar, Plane, Hotel, Cloud, Coins, Wallet, Bookmark, User, LogOut, MapPin } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -27,6 +27,10 @@ const Navigation = () => {
         <Link to="/dashboard" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
           <LayoutDashboard size={16} />
           <span>Dashboard</span>
+        </Link>
+        <Link to="/trips" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/trips') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
+          <MapPin size={16} />
+          <span>Trips</span>
         </Link>
         <Link to="/planner" className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/planner') ? 'text-brand-800' : 'text-minimal-muted hover:text-minimal-text'}`}>
           <Sparkles size={16} />

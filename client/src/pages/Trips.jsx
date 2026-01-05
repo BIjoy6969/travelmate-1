@@ -16,6 +16,8 @@ export default function Trips() {
     startDate: "",
     endDate: "",
     type: "Leisure",
+    budget: "",
+    notes: "",
   });
 
   const loadTrips = async () => {
@@ -48,6 +50,8 @@ export default function Trips() {
         startDate: "",
         endDate: "",
         type: "Leisure",
+        budget: "",
+        notes: "",
       });
       await loadTrips();
     } catch {
@@ -134,6 +138,19 @@ export default function Trips() {
                 <option value="Adventure">Adventure</option>
                 <option value="Family">Family</option>
               </select>
+              <input
+                type="number"
+                className="tm-input"
+                placeholder="Budget"
+                value={formData.budget}
+                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+              />
+              <textarea
+                className="tm-input md:col-span-2"
+                placeholder="Notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              />
 
               <button type="submit" className="tm-btn-primary md:col-span-2">
                 Create Trip
@@ -160,9 +177,13 @@ export default function Trips() {
                     <p className="text-lg font-semibold text-slate-100">{trip.title}</p>
                     <p className="mt-1 text-sm text-slate-300">{trip.destination}</p>
                     <p className="mt-2 text-xs text-slate-500">
-                      {trip.startDate} → {trip.endDate}
+                      {trip.startDate ? new Date(trip.startDate).toLocaleDateString() : ""} → {trip.endDate ? new Date(trip.endDate).toLocaleDateString() : ""}
                     </p>
-                    <span className="mt-3 inline-block tm-badge">{trip.type}</span>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <span className="inline-block tm-badge">{trip.tripType || trip.type}</span>
+                      {trip.budget > 0 && <span className="inline-block tm-badge bg-green-500/20 text-green-300">${trip.budget}</span>}
+                    </div>
+                    {trip.notes && <p className="mt-2 text-sm text-slate-400 italic">"{trip.notes}"</p>}
                   </div>
 
                   <div className="flex flex-col gap-2">

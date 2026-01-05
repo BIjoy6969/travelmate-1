@@ -6,7 +6,7 @@ const tripSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  name: {
+  title: {
     type: String,
     required: true
   },
@@ -28,8 +28,8 @@ const tripSchema = new mongoose.Schema({
   },
   tripType: {
     type: String,
-    enum: ['solo', 'couple', 'family', 'friends', 'business', 'other'],
-    default: 'solo'
+    enum: ['Leisure', 'Business', 'Adventure', 'Family', 'Other'],
+    default: 'Leisure'
   },
   notes: {
     type: String
