@@ -18,7 +18,7 @@ import Expenses from "./pages/Expenses";
 import Flights from "./pages/Flights";
 import Weather from "./pages/Weather";
 import Currency from "./pages/Currency";
-import DestinationsPage from "./pages/DestinationsPage";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -73,7 +73,7 @@ function App() {
             <Route path="/flights" element={<ErrorBoundary><ProtectedRoute><Flights /></ProtectedRoute></ErrorBoundary>} />
             <Route path="/weather" element={<ErrorBoundary><ProtectedRoute><Weather /></ProtectedRoute></ErrorBoundary>} />
             <Route path="/currency" element={<ErrorBoundary><ProtectedRoute><Currency /></ProtectedRoute></ErrorBoundary>} />
-            <Route path="/destinations" element={<ErrorBoundary><ProtectedRoute><DestinationsPage /></ProtectedRoute></ErrorBoundary>} />
+            
             <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
             <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
             <Route path="/profile" element={<ErrorBoundary><ProtectedRoute><Profile /></ProtectedRoute></ErrorBoundary>} />
