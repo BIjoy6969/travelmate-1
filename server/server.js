@@ -66,4 +66,11 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+// Only run the server if we are NOT on Vercel (Development mode)
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+}
+
+// Export the app for Vercel Serverless Functions
+module.exports = app;
