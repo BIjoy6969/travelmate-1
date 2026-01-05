@@ -8,9 +8,7 @@ import axios from "axios";
  */
 const API_PORT = import.meta.env.VITE_API_PORT || 5000;
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? `http://localhost:5000/api` : `/api`);
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Demo user id removed as JWT is now implemented
 
