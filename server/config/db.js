@@ -1,13 +1,21 @@
 const mongoose = require('mongoose');
 
+let isConnected = false;
+
 const connectDB = async () => {
+    if (isConnected) {
+        console.log('Using existing database connection');
+        return;
+    }
+
     try {
-        await mongoose.connect(process.env.MONGO_URI);
+        const db = await mongoose.connect(process.env.MONGO_URI);
+        isConnected = db.connections[0].readyState === 1;
         console.log('MongoDB Connected...');
     } catch (err) {
-        console.error(err.message);
-        // Exit process with failure
-        process.exit(1);
+        console.error('MongoDB connection error:', err.message);
+        // Don't exit process in serverless environment
+        throw err;
     }
 };
 
